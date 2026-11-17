@@ -1,0 +1,16 @@
+<% if (typeof flash !== 'undefined' && flash) { %>
+  <div class="flash flash-<%= flash.type %>" role="status">
+    <div>
+      <span class="flash-label"><%= flash.type === 'success' ? 'Berhasil' : flash.type === 'error' ? 'Perlu diperiksa' : 'Informasi' %></span>
+      <%= flash.message %>
+    </div>
+  </div>
+<% } %>
+<% if (typeof notice !== 'undefined' && notice) { %>
+  <div class="flash flash-<%= notice.type %>" role="status">
+    <div>
+      <span class="flash-label">Catatan</span>
+      <%= notice.message %>
+    </div>
+  </div>
+<% } %>

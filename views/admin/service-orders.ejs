@@ -1,0 +1,43 @@
+<%- include('../partials/panel-start', { panelTitle: 'Service order', panelSub: 'Satu booking bisa berisi beberapa service order. Status booking mengikuti agregat item.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/service-order">
+  <div class="field" style="flex:1;min-width:220px">
+    <label for="q">Cari layanan / kode / teknisi</label>
+    <input class="input" type="search" id="q" name="q" value="<%= filters.q %>" />
+  </div>
+  <div class="field">
+    <label for="status">Status</label>
+    <select class="select" id="status" name="status">
+      <option value="">Semua</option>
+      <% Object.entries(f.SERVICE_ORDER_STATUS).forEach(([key, info]) => { %>
+        <option value="<%= key %>" <%= filters.status === key ? 'selected' : '' %>><%= info.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/service-order">Reset</a>
+</form>
+
+<div class="flex-between mb-1"><span class="tiny muted"><%= total %> service order</span></div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Layanan</th><th>Booking</th><th>Jadwal</th><th>Teknisi</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% orders.forEach((order) => { %>
+        <tr>
+          <td><strong><%= order.service_name %></strong><span class="table-note"><%= order.category_name %> · <%= formatRupiah(order.price) %></span></td>
+          <td class="mono"><a class="link" href="/admin/booking/<%= order.code %>"><%= order.code %></a><span class="table-note"><%= order.city %></span></td>
+          <td class="small"><%= f.formatDate(order.scheduled_date) %></td>
+          <td class="small"><%= order.technician_name || '—' %><span class="table-note"><%= order.work_status ? f.WORK_ORDER_STATUS[order.work_status].label : '' %></span></td>
+          <td><%- f.statusBadge(f.SERVICE_ORDER_STATUS, order.status) %></td>
+          <td><a class="text-link" href="/admin/booking/<%= order.code %>">Kelola</a></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/service-order', queryParams: { q: filters.q, status: filters.status }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

@@ -1,0 +1,80 @@
+<%- include('../partials/head', { title: 'Bantuan & keluhan', description: 'Kirim keluhan terkait pekerjaan dan pantau tanggapan admin FieldsOps.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Bantuan</p>
+      <h1>Keluhan &amp; tindak lanjut.</h1>
+      <p>Setiap keluhan mendapat kode dan ditangani admin. Sebutkan kode booking agar pemeriksaan lebih cepat.</p>
+    </div>
+    <span class="chip"><%= total %> keluhan</span>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="split" style="padding-bottom:2.5rem">
+    <div>
+      <% if (complaints.length === 0) { %>
+        <div class="empty-state">
+          <span class="glyph">!</span>
+          <h3>Belum ada keluhan</h3>
+          <p>Semoga tidak perlu. Kalau ada pekerjaan yang tidak sesuai, kirim lewat formulir di samping.</p>
+        </div>
+      <% } else { %>
+        <% complaints.forEach((complaint) => { %>
+          <article class="card card-pad" style="margin-bottom:.8rem">
+            <div class="flex-between">
+              <div>
+                <span class="tiny muted mono"><%= complaint.code %></span>
+                <h2 class="h3" style="font-size:1.05rem;margin:.2rem 0"><%= complaint.subject %></h2>
+              </div>
+              <%- f.statusBadge(f.COMPLAINT_STATUS, complaint.status) %>
+            </div>
+            <p class="small" style="margin:.5rem 0"><%= complaint.message %></p>
+            <% if (complaint.booking_code) { %>
+              <p class="tiny muted">Terkait booking <a class="link" href="/booking/<%= complaint.booking_code %>"><%= complaint.booking_code %></a> · <%= f.formatDateTime(complaint.created_at) %></p>
+            <% } else { %>
+              <p class="tiny muted"><%= f.formatDateTime(complaint.created_at) %></p>
+            <% } %>
+            <% if (complaint.response) { %>
+              <div class="notice" style="margin:.6rem 0 0">
+                <strong class="small">Tanggapan admin</strong>
+                <p class="small mb-0"><%= complaint.response %></p>
+              </div>
+            <% } %>
+          </article>
+        <% }); %>
+        <%- include('../partials/pagination', { baseUrl: '/keluhan', queryParams: {}, page, pages }) %>
+      <% } %>
+    </div>
+
+    <aside>
+      <form method="post" action="/keluhan" class="card card-pad sticky-card">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <h2 class="h3">Kirim keluhan baru</h2>
+        <div class="field">
+          <label for="booking_id">Terkait booking <span class="muted">(opsional)</span></label>
+          <select class="select" id="booking_id" name="booking_id">
+            <option value="">Tidak terkait booking tertentu</option>
+            <% bookings.forEach((booking) => { %>
+              <option value="<%= booking.id %>"><%= booking.code %> · <%= f.formatDate(booking.scheduled_date) %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="subject">Subjek</label>
+          <input class="input" type="text" id="subject" name="subject" minlength="5" maxlength="160" required placeholder="mis. AC berisik setelah servis" />
+        </div>
+        <div class="field">
+          <label for="message">Detail</label>
+          <textarea class="textarea" id="message" name="message" minlength="15" maxlength="800" rows="4" required placeholder="Apa yang terjadi, kapan, dan hasil yang Anda harapkan."></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Kirim keluhan</button>
+        <p class="tiny muted mt-1 mb-0">Anda akan mendapat notifikasi saat status berubah.</p>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/site-footer') %>

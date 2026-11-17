@@ -1,0 +1,47 @@
+<%- include('../partials/head', { title: 'Beri ulasan', description: 'Nilai pekerjaan teknisi dan tulis pengalaman Anda.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap wrap-narrow">
+  <div style="padding:2rem 0 3rem">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/akun">Akun</a><span aria-hidden="true">/</span>
+      <a href="/booking/<%= booking.code %>"><%= booking.code %></a><span aria-hidden="true">/</span><span>Ulasan</span>
+    </nav>
+
+    <p class="eyebrow">Ulasan pekerjaan</p>
+    <h1 class="h2">Bagaimana hasil kerjanya?</h1>
+    <p class="lede"><%= order.service_name %> · <%= f.formatDateLong(booking.scheduled_date) %>. Ulasan tidak bisa diubah setelah dikirim.</p>
+
+    <% if (error) { %>
+      <div class="flash flash-error" role="alert"><div><span class="flash-label">Perlu diperbaiki</span><%= error %></div></div>
+    <% } %>
+
+    <form method="post" action="/booking/<%= booking.code %>/ulasan/<%= order.id %>" class="card card-pad mt-2">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <div class="field">
+        <span class="field-label">Rating</span>
+        <div class="rating-input" role="radiogroup" aria-label="Rating 1 sampai 5 bintang">
+          <% [5, 4, 3, 2, 1].forEach((value) => { %>
+            <input type="radio" id="rating-<%= value %>" name="rating" value="<%= value %>" required />
+            <label for="rating-<%= value %>" title="<%= value %> bintang" aria-label="<%= value %> bintang">★</label>
+          <% }); %>
+        </div>
+        <p class="help">1 = tidak sesuai, 5 = bekerja rapi dan jelas.</p>
+      </div>
+
+      <div class="field">
+        <label for="comment">Ceritakan singkat <span class="muted">(opsional)</span></label>
+        <textarea class="textarea" id="comment" name="comment" maxlength="600" rows="4" placeholder="Apa yang dikerjakan dengan baik? Ada yang perlu diperbaiki?"></textarea>
+        <p class="help">Jangan tulis nomor telepon atau alamat lengkap di ulasan publik.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Kirim ulasan</button>
+        <a class="btn btn-ghost" href="/booking/<%= booking.code %>">Nanti saja</a>
+      </div>
+    </form>
+  </div>
+</main>
+
+<%- include('../partials/site-footer') %>

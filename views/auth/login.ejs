@@ -1,0 +1,87 @@
+<%- include('../partials/head', { title: 'Masuk', description: 'Masuk ke akun FieldsOps untuk memesan layanan atau mengelola pekerjaan sebagai teknisi.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div class="auth-page">
+    <section class="auth-visual">
+      <span class="auth-orb one" aria-hidden="true"></span>
+      <span class="auth-orb two" aria-hidden="true"></span>
+      <div>
+        <p class="eyebrow auth-enter">Satu akun, tiga peran</p>
+        <h1 class="auth-enter">Kerja lapangan yang <span style="color:#ffb066">tercatat rapi.</span></h1>
+        <p class="lede auth-enter">
+          Customer memesan, teknisi mengerjakan, admin memastikan semuanya berjalan.
+          Tidak ada status yang berubah tanpa jejak.
+        </p>
+        <div class="auth-chips auth-enter" aria-hidden="true">
+          <span class="auth-chip">Work order tercatat</span>
+          <span class="auth-chip">Teknisi terverifikasi</span>
+          <span class="auth-chip">Pembayaran transparan</span>
+        </div>
+      </div>
+      <div class="auth-foot">
+        <p class="mb-0">Akun demo tersedia di bawah formulir. Data demo berisi booking, penugasan, dan transaksi nyata.</p>
+        <span class="mono" style="letter-spacing:.12em">FIELDSOPS · <%= currentYear %></span>
+      </div>
+    </section>
+
+    <section class="auth-card">
+      <%- include('../partials/flash') %>
+      <p class="eyebrow auth-enter">Selamat datang kembali</p>
+      <h2 class="h3 auth-enter" style="font-size:1.6rem">Masuk ke FieldsOps</h2>
+      <p class="small muted auth-enter">Gunakan email yang terdaftar. Sesi berlaku 7 hari.</p>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="flash flash-error" role="alert"><div><span class="flash-label">Gagal masuk</span><%= error %></div></div>
+      <% } %>
+
+      <form method="post" action="/login" novalidate class="auth-enter">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="next" value="<%= next %>" />
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" type="email" id="email" name="email" value="<%= email %>" autocomplete="email" required autofocus />
+        </div>
+        <div class="field">
+          <label for="password">Kata sandi</label>
+          <div class="pw-wrap">
+            <input class="input" type="password" id="password" name="password" autocomplete="current-password" required />
+            <button type="button" class="pw-toggle" data-pw-toggle="password" aria-label="Tampilkan kata sandi">Lihat</button>
+          </div>
+        </div>
+        <div class="flex-between mb-2">
+          <label class="check" style="padding:0"><input type="checkbox" checked disabled /> <span class="tiny muted">Ingat sesi di perangkat ini</span></label>
+          <a class="tiny link" href="/lupa-sandi">Lupa kata sandi?</a>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Masuk</button>
+      </form>
+
+      <p class="small muted mt-2">Belum punya akun? <a class="link" href="/register">Daftar sebagai customer</a> atau <a class="link" href="/register?role=technician">ajukan sebagai teknisi</a>.</p>
+
+      <% if (demoAccounts.length) { %>
+        <div class="auth-demo" style="margin-top:1rem;border-top:1px solid var(--line);padding-top:.9rem">
+          <p class="tiny muted mb-1" style="letter-spacing:.1em;text-transform:uppercase">Akun demo</p>
+          <div class="flex-wrap">
+            <% demoAccounts.forEach((account) => { %>
+              <button type="button" class="chip" data-demo-email="<%= account.email %>" data-demo-password="<%= account.password %>">
+                <%= account.role %>
+              </button>
+            <% }); %>
+          </div>
+          <p class="tiny muted mt-1">Klik salah satu untuk mengisi formulir otomatis.</p>
+        </div>
+        <script>
+          document.querySelectorAll('[data-demo-email]').forEach((button) => {
+            button.addEventListener('click', () => {
+              document.getElementById('email').value = button.dataset.demoEmail;
+              document.getElementById('password').value = button.dataset.demoPassword;
+              document.getElementById('email').focus();
+            });
+          });
+        </script>
+      <% } %>
+    </section>
+  </div>
+</main>
+
+<%- include('../partials/site-footer') %>

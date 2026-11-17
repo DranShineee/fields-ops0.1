@@ -1,0 +1,81 @@
+<%- include('../partials/head', { title: 'Profil & alamat', description: 'Kelola nama, nomor WhatsApp, alamat, dan kata sandi akun FieldsOps.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap wrap-narrow">
+  <div style="padding:2rem 0 1rem">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/akun">Akun</a><span aria-hidden="true">/</span><span>Profil</span>
+    </nav>
+    <p class="eyebrow">Data akun</p>
+    <h1 class="h2">Profil &amp; alamat.</h1>
+    <p class="lede">Alamat ini dipakai sebagai default saat memesan. Alamat lengkap hanya dibagikan ke teknisi yang ditugaskan.</p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="split-even" style="align-items:start;padding-bottom:2.5rem">
+    <form method="post" action="/profil" class="card card-pad">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <h2 class="h3">Identitas &amp; alamat</h2>
+
+      <div class="field">
+        <label for="name">Nama lengkap</label>
+        <input class="input <%= errors.name ? 'has-error' : '' %>" type="text" id="name" name="name" value="<%= form.name || '' %>" required />
+        <% if (errors.name) { %><p class="error-text"><%= errors.name %></p><% } %>
+      </div>
+
+      <div class="field">
+        <label for="phone">Nomor WhatsApp</label>
+        <input class="input <%= errors.phone ? 'has-error' : '' %>" type="tel" id="phone" name="phone" value="<%= form.phone || '' %>" required />
+        <% if (errors.phone) { %><p class="error-text"><%= errors.phone %></p><% } %>
+      </div>
+
+      <div class="field">
+        <label for="address">Alamat</label>
+        <textarea class="textarea" id="address" name="address" rows="3" placeholder="Jalan, nomor rumah, patokan"><%= form.address || '' %></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="city">Kota</label>
+          <input class="input" type="text" id="city" name="city" value="<%= form.city || '' %>" />
+        </div>
+        <div class="field">
+          <label for="postal_code">Kode pos</label>
+          <input class="input <%= errors.postal_code ? 'has-error' : '' %>" type="text" id="postal_code" name="postal_code" inputmode="numeric" maxlength="5" value="<%= form.postal_code || '' %>" />
+          <% if (errors.postal_code) { %><p class="error-text"><%= errors.postal_code %></p><% } %>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Simpan profil</button>
+    </form>
+
+    <div>
+      <form method="post" action="/profil/sandi" class="card card-pad mb-2" id="sandi">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <h2 class="h3">Ganti kata sandi</h2>
+        <div class="field">
+          <label for="current_password">Kata sandi saat ini</label>
+          <input class="input" type="password" id="current_password" name="current_password" autocomplete="current-password" required />
+        </div>
+        <div class="field">
+          <label for="new_password">Kata sandi baru</label>
+          <input class="input" type="password" id="new_password" name="new_password" minlength="8" autocomplete="new-password" required />
+        </div>
+        <div class="field">
+          <label for="confirm_password">Ulangi kata sandi baru</label>
+          <input class="input" type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required />
+        </div>
+        <button class="btn btn-outline" type="submit">Perbarui kata sandi</button>
+      </form>
+
+      <div class="card card-pad">
+        <h2 class="h3" style="font-size:.95rem">Email akun</h2>
+        <p class="small mb-1"><%= currentUser.email %></p>
+        <p class="tiny muted mb-0">Email dipakai untuk masuk dan tidak dapat diubah sendiri. Hubungi admin bila perlu diganti.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/site-footer') %>

@@ -1,0 +1,64 @@
+<%- include('../partials/panel-start', { panelTitle: 'Data teknisi', panelSub: 'Beban kerja, kompetensi, dan status kemitraan seluruh teknisi.' }) %>
+
+<div class="flex-between mb-2">
+  <span class="tiny muted"><%= technicians.length %> akun teknisi</span>
+  <a class="btn btn-outline btn-sm" href="/admin/verifikasi">Buka verifikasi</a>
+</div>
+
+<% technicians.forEach((tech) => { %>
+  <article class="surface mb-2">
+    <div class="surface-body">
+      <div class="flex-between">
+        <div>
+          <strong><%= tech.name %></strong>
+          <span class="table-note"><%= tech.email %> · <%= tech.phone || '—' %> · <%= tech.service_area || 'area belum diisi' %></span>
+        </div>
+        <div class="flex-wrap">
+          <%- f.statusBadge(f.TECHNICIAN_STATUS, tech.status) %>
+          <span class="chip"><%= tech.rating || 0 %> ★</span>
+        </div>
+      </div>
+
+      <div class="split-even" style="margin-top:.8rem;gap:1rem">
+        <dl class="kv">
+          <div><dt>Pekerjaan aktif</dt><dd><%= tech.active_jobs %></dd></div>
+          <div><dt>Selesai</dt><dd><%= tech.completed_jobs %></dd></div>
+          <div><dt>Pendapatan</dt><dd><%= f.formatRupiah(tech.earnings) %></dd></div>
+          <div><dt>Ketersediaan</dt><dd><%= tech.is_available ? 'Tersedia' : 'Tidak tersedia' %></dd></div>
+        </dl>
+        <div>
+          <p class="small"><strong>Kompetensi disetujui:</strong> <%= tech.categories || 'belum ada' %></p>
+          <p class="small mb-0"><strong>Jadwal:</strong>
+            <% if (!schedule[tech.id] || !schedule[tech.id].length) { %>
+              <span class="muted">belum diatur</span>
+            <% } else { %>
+              <% schedule[tech.id].forEach((slot) => { %>
+                <span class="chip"><%= ['Min','Sen','Sel','Rab','Kam','Jum','Sab'][slot.day_of_week] %> <%= slot.start_time.slice(0,5) %>–<%= slot.end_time.slice(0,5) %></span>
+              <% }); %>
+            <% } %>
+          </p>
+        </div>
+      </div>
+
+      <% if (tech.status === 'approved' || tech.status === 'suspended') { %>
+        <details style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.6rem">
+          <summary style="cursor:pointer;font-size:.82rem"><%= tech.status === 'suspended' ? 'Aktifkan kembali kemitraan' : 'Tangguhkan kemitraan' %></summary>
+          <form method="post" action="/admin/teknisi/<%= tech.id %>/tangguhkan" style="margin-top:.6rem" data-confirm="Ubah status kemitraan <%= tech.name %>?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <% if (tech.status === 'approved') { %>
+              <div class="field">
+                <label for="note-<%= tech.id %>">Alasan penangguhan</label>
+                <input class="input" type="text" id="note-<%= tech.id %>" name="note" minlength="10" maxlength="300" required placeholder="mis. indikasi pekerjaan tidak sesuai SOP" />
+              </div>
+            <% } %>
+            <button class="btn btn-<%= tech.status === 'suspended' ? 'primary' : 'danger' %> btn-sm" type="submit">
+              <%= tech.status === 'suspended' ? 'Aktifkan' : 'Tangguhkan' %>
+            </button>
+          </form>
+        </details>
+      <% } %>
+    </div>
+  </article>
+<% }); %>
+
+<%- include('../partials/panel-end') %>

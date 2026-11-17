@@ -1,0 +1,58 @@
+<%- include('../partials/panel-start', { panelTitle: 'Ulasan', panelSub: 'Sembunyikan ulasan yang melanggar, bukan yang hanya bernada negatif.' }) %>
+
+<div class="stat-cards">
+  <div class="stat-card"><span class="stat-card-value"><%= summary.total || 0 %></span><span class="stat-card-label">Total ulasan</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= summary.average || '—' %></span><span class="stat-card-label">Rata-rata rating</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= summary.low || 0 %></span><span class="stat-card-label">Rating ≤ 2</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= total %></span><span class="stat-card-label">Hasil filter</span></div>
+</div>
+
+<form class="filter-bar" method="get" action="/admin/ulasan">
+  <div class="field">
+    <label for="rating">Rating</label>
+    <select class="select" id="rating" name="rating">
+      <option value="">Semua</option>
+      <% [5,4,3,2,1].forEach((r) => { %>
+        <option value="<%= r %>" <%= filters.rating === r ? 'selected' : '' %>><%= r %> bintang</option>
+      <% }); %>
+    </select>
+  </div>
+  <label class="check" style="margin-top:1rem"><input type="checkbox" name="hidden" value="1" <%= filters.hidden ? 'checked' : '' %> /> <span>Hanya yang disembunyikan</span></label>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/ulasan">Reset</a>
+</form>
+
+<% reviews.forEach((review) => { %>
+  <article class="surface mb-2">
+    <div class="surface-body">
+      <div class="flex-between">
+        <div>
+          <span class="review-stars"><%= '★'.repeat(review.rating) %><%= '☆'.repeat(5 - review.rating) %></span>
+          <strong class="small" style="display:block"><%= review.service_name %></strong>
+          <span class="table-note"><%= review.code %> · <%= review.customer_name %> → <%= review.technician_name %></span>
+        </div>
+        <div class="flex-wrap">
+          <% if (review.is_hidden) { %><span class="status-pill tone-cancel">Disembunyikan</span><% } %>
+          <form method="post" action="/admin/ulasan/<%= review.id %>/sembunyi">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="btn btn-ghost btn-sm" type="submit"><%= review.is_hidden ? 'Tampilkan' : 'Sembunyikan' %></button>
+          </form>
+        </div>
+      </div>
+      <p class="small" style="margin:.55rem 0 0"><%= review.comment || 'Tanpa komentar.' %></p>
+      <p class="tiny muted" style="margin:.4rem 0 0"><%= f.formatDateTime(review.created_at) %></p>
+    </div>
+  </article>
+<% }); %>
+
+<% if (reviews.length === 0) { %>
+  <div class="empty-state">
+    <span class="glyph">★</span>
+    <h3>Tidak ada ulasan</h3>
+    <p>Ulasan hanya dibuat customer setelah pekerjaan berstatus selesai.</p>
+  </div>
+<% } %>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/ulasan', queryParams: { rating: filters.rating || '', hidden: filters.hidden ? '1' : '' }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

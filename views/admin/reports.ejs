@@ -1,0 +1,98 @@
+<%- include('../partials/panel-start', { panelTitle: 'Laporan', panelSub: 'Rekap booking, pendapatan, dan performa teknisi pada rentang tanggal terpilih.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/laporan">
+  <div class="field">
+    <label for="from">Dari tanggal</label>
+    <input class="input" type="date" id="from" name="from" value="<%= from %>" />
+  </div>
+  <div class="field">
+    <label for="to">Sampai tanggal</label>
+    <input class="input" type="date" id="to" name="to" value="<%= to %>" />
+  </div>
+  <button class="btn btn-primary" type="submit">Terapkan</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/laporan">Bulan ini</a>
+</form>
+
+<div class="stat-cards">
+  <div class="stat-card"><span class="stat-card-value"><%= summary.bookings || 0 %></span><span class="stat-card-label">Booking masuk</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= summary.completed || 0 %></span><span class="stat-card-label">Selesai</span><span class="stat-card-note"><%= summary.cancelled || 0 %> dibatalkan</span></div>
+  <div class="stat-card"><span class="stat-card-value" style="font-size:1.15rem"><%= formatRupiah(summary.revenue || 0) %></span><span class="stat-card-label">Pendapatan lunas</span></div>
+  <div class="stat-card"><span class="stat-card-value" style="font-size:1.15rem"><%= formatRupiah(summary.fees || 0) %></span><span class="stat-card-label">Komisi platform</span><span class="stat-card-note">Hak teknisi <%= formatRupiah(summary.payouts || 0) %></span></div>
+</div>
+
+<div class="split-even mb-2">
+  <section class="surface">
+    <div class="surface-head"><h2>Per kategori</h2></div>
+    <div class="surface-body">
+      <% if (byCategory.length === 0) { %><p class="small muted mb-0">Tidak ada data pada rentang ini.</p><% } %>
+      <% byCategory.forEach((row) => { %>
+        <div style="display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--line)">
+          <span class="small"><%= row.name %><span class="table-note"><%= row.total %> item</span></span>
+          <strong class="small"><%= formatRupiah(row.value) %></strong>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <section class="surface">
+    <div class="surface-head"><h2>Status booking</h2></div>
+    <div class="surface-body">
+      <% const statusTotal = byStatus.reduce((sum, row) => sum + Number(row.total), 0) || 1; %>
+      <% byStatus.forEach((row) => { %>
+        <div style="margin-bottom:.6rem">
+          <div class="flex-between" style="font-size:.8rem"><span><%= f.BOOKING_STATUS[row.status] ? f.BOOKING_STATUS[row.status].label : row.status %></span><span><%= row.total %></span></div>
+          <div class="progress-track" style="margin-top:.25rem"><div class="progress-fill" style="width:<%= Math.round((row.total / statusTotal) * 100) %>%"></div></div>
+        </div>
+      <% }); %>
+      <% if (byStatus.length === 0) { %><p class="small muted mb-0">Tidak ada booking pada rentang ini.</p><% } %>
+    </div>
+  </section>
+</div>
+
+<div class="split-even mb-2">
+  <section class="surface">
+    <div class="surface-head"><h2>Layanan terlaris</h2></div>
+    <div class="surface-body">
+      <% if (topServices.length === 0) { %><p class="small muted mb-0">Belum ada data.</p><% } %>
+      <% topServices.forEach((row) => { %>
+        <div style="display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--line)">
+          <span class="small"><%= row.name %><span class="table-note"><%= row.total %> kali dipesan</span></span>
+          <strong class="small"><%= formatRupiah(row.value) %></strong>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <section class="surface">
+    <div class="surface-head"><h2>Performa teknisi</h2></div>
+    <div class="surface-body">
+      <% if (topTechs.length === 0) { %><p class="small muted mb-0">Belum ada pekerjaan selesai pada rentang ini.</p><% } %>
+      <% topTechs.forEach((row) => { %>
+        <div style="display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--line)">
+          <span class="small"><%= row.name %><span class="table-note"><%= row.jobs %> pekerjaan · ★ <%= row.rating %></span></span>
+          <strong class="small"><%= formatRupiah(row.value) %></strong>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+</div>
+
+<section class="surface">
+  <div class="surface-head"><h2>Booking harian</h2><span class="chip"><%= from %> → <%= to %></span></div>
+  <div class="surface-body">
+    <% const maxDaily = Math.max(1, ...daily.map((row) => Number(row.total))); %>
+    <% if (daily.length === 0) { %>
+      <p class="small muted mb-0">Tidak ada booking pada rentang ini.</p>
+    <% } else { %>
+      <% daily.forEach((row) => { %>
+        <div style="display:flex;align-items:center;gap:.6rem;padding:.25rem 0">
+          <span class="tiny muted" style="width:82px"><%= f.formatDate(row.day) %></span>
+          <div class="progress-track" style="flex:1"><div class="progress-fill" style="width:<%= Math.round((row.total / maxDaily) * 100) %>%"></div></div>
+          <span class="tiny mono"><%= row.total %></span>
+        </div>
+      <% }); %>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/panel-end') %>

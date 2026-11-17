@@ -1,0 +1,62 @@
+<%- include('../partials/panel-start', { panelTitle: 'Keluhan', panelSub: 'Tanggapi dengan jelas. Customer menerima notifikasi setiap perubahan status.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/keluhan">
+  <div class="field">
+    <label for="status">Status</label>
+    <select class="select" id="status" name="status">
+      <option value="">Semua</option>
+      <% Object.entries(f.COMPLAINT_STATUS).forEach(([key, info]) => { %>
+        <option value="<%= key %>" <%= filters.status === key ? 'selected' : '' %>><%= info.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/keluhan">Reset</a>
+</form>
+
+<div class="flex-between mb-1"><span class="tiny muted"><%= total %> keluhan</span></div>
+
+<% complaints.forEach((complaint) => { %>
+  <article class="surface mb-2">
+    <div class="surface-body">
+      <div class="flex-between">
+        <div>
+          <span class="tiny muted mono"><%= complaint.code %> · <%= f.formatDateTime(complaint.created_at) %></span>
+          <h2 class="h3" style="font-size:1.05rem;margin:.25rem 0"><%= complaint.subject %></h2>
+          <span class="table-note"><%= complaint.customer_name %> · <%= complaint.customer_email %><% if (complaint.booking_code) { %> · <%= complaint.booking_code %><% } %></span>
+        </div>
+        <%- f.statusBadge(f.COMPLAINT_STATUS, complaint.status) %>
+      </div>
+
+      <p class="small" style="margin:.6rem 0"><%= complaint.message %></p>
+      <% if (complaint.response) { %>
+        <div class="notice"><strong class="small">Tanggapan terakhir</strong><p class="small mb-0"><%= complaint.response %></p></div>
+      <% } %>
+
+      <form method="post" action="/admin/keluhan/<%= complaint.id %>" style="margin-top:.7rem;border-top:1px solid var(--line);padding-top:.7rem">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="field">
+          <label for="response-<%= complaint.id %>">Tanggapan</label>
+          <textarea class="textarea" id="response-<%= complaint.id %>" name="response" rows="2" style="min-height:64px" maxlength="600"><%= complaint.response || '' %></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline btn-sm" type="submit" name="status" value="in_review">Tandai ditinjau</button>
+          <button class="btn btn-primary btn-sm" type="submit" name="status" value="resolved">Selesaikan</button>
+          <button class="btn btn-danger btn-sm" type="submit" name="status" value="rejected">Tolak</button>
+        </div>
+      </form>
+    </div>
+  </article>
+<% }); %>
+
+<% if (complaints.length === 0) { %>
+  <div class="empty-state">
+    <span class="glyph">!</span>
+    <h3>Tidak ada keluhan</h3>
+    <p>Keluhan dari customer akan muncul di sini dengan kode unik.</p>
+  </div>
+<% } %>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/keluhan', queryParams: { status: filters.status }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

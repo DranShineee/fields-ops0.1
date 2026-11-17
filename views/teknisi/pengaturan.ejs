@@ -1,0 +1,50 @@
+<%- include('../partials/panel-start', { panelTitle: 'Pengaturan akun', panelSub: 'Ganti kata sandi dan periksa keamanan akun Anda.' }) %>
+
+<div class="split">
+  <form method="post" action="/teknisi/pengaturan" class="surface">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <div class="surface-head"><h2>Ganti kata sandi</h2></div>
+    <div class="surface-body">
+      <div class="field">
+        <label for="current_password">Kata sandi saat ini</label>
+        <input class="input" type="password" id="current_password" name="current_password" autocomplete="current-password" required />
+      </div>
+      <div class="field">
+        <label for="new_password">Kata sandi baru</label>
+        <input class="input" type="password" id="new_password" name="new_password" minlength="8" autocomplete="new-password" required />
+        <p class="help">Minimal 8 karakter, mengandung huruf dan angka.</p>
+      </div>
+      <div class="field">
+        <label for="confirm_password">Ulangi kata sandi baru</label>
+        <input class="input" type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required />
+      </div>
+      <button class="btn btn-primary" type="submit">Perbarui kata sandi</button>
+    </div>
+  </form>
+
+  <aside>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Akun</h2></div>
+      <div class="surface-body">
+        <dl class="kv">
+          <div><dt>Nama</dt><dd><%= currentUser.name %></dd></div>
+          <div><dt>Email</dt><dd><%= currentUser.email %></dd></div>
+          <div><dt>Peran</dt><dd><%= f.roleLabel(currentUser.role) %></dd></div>
+          <div><dt>Kemitraan</dt><dd><%- f.statusBadge(f.TECHNICIAN_STATUS, technician ? technician.status : 'pending') %></dd></div>
+        </dl>
+      </div>
+    </section>
+    <section class="surface">
+      <div class="surface-head"><h2>Akses data</h2></div>
+      <div class="surface-body">
+        <p class="small muted mb-0">
+          Anda hanya dapat melihat alamat dan kontak customer untuk pekerjaan yang ditugaskan kepada Anda.
+          Dokumen identitas tidak dapat diakses dari akun ini setelah dikirim.
+        </p>
+        <a class="text-link mt-2" href="/keluhan">Ajukan bantuan ke admin →</a>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

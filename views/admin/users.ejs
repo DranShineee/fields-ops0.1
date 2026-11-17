@@ -1,0 +1,71 @@
+<%- include('../partials/panel-start', { panelTitle: 'Kelola pengguna', panelSub: 'Cari akun, periksa peran, dan nonaktifkan akses bila perlu.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/pengguna">
+  <div class="field" style="flex:1;min-width:200px">
+    <label for="q">Cari nama, email, atau telepon</label>
+    <input class="input" type="search" id="q" name="q" value="<%= filters.q %>" />
+  </div>
+  <div class="field">
+    <label for="role">Peran</label>
+    <select class="select" id="role" name="role">
+      <option value="">Semua peran</option>
+      <option value="customer" <%= filters.role === 'customer' ? 'selected' : '' %>>Customer</option>
+      <option value="technician" <%= filters.role === 'technician' ? 'selected' : '' %>>Technician</option>
+      <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="status">Status</label>
+    <select class="select" id="status" name="status">
+      <option value="">Semua</option>
+      <option value="aktif" <%= filters.status === 'aktif' ? 'selected' : '' %>>Aktif</option>
+      <option value="nonaktif" <%= filters.status === 'nonaktif' ? 'selected' : '' %>>Nonaktif</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/pengguna">Reset</a>
+</form>
+
+<div class="flex-between mb-1">
+  <span class="tiny muted"><%= total %> akun ditemukan</span>
+</div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr><th>Nama</th><th>Peran</th><th>Kontak</th><th>Aktivitas</th><th>Status</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+      <% users.forEach((user) => { %>
+        <tr>
+          <td>
+            <strong><%= user.name %></strong>
+            <span class="table-note">Terdaftar <%= f.formatDate(user.created_at) %></span>
+          </td>
+          <td><%= f.roleLabel(user.role) %><% if (user.tech_status) { %><span class="table-note"><%- f.statusBadge(f.TECHNICIAN_STATUS, user.tech_status) %></span><% } %></td>
+          <td class="small"><%= user.email %><span class="table-note"><%= user.phone || '—' %></span></td>
+          <td class="small muted">
+            <% if (user.role === 'customer') { %><%= user.booking_count %> booking
+            <% } else if (user.role === 'technician') { %><%= user.job_count %> pekerjaan selesai
+            <% } else { %>Admin platform<% } %>
+          </td>
+          <td><%- f.statusBadge({ aktif: { label: 'Aktif', tone: 'done' }, nonaktif: { label: 'Nonaktif', tone: 'cancel' } }, user.is_active ? 'aktif' : 'nonaktif') %></td>
+          <td>
+            <% if (user.id !== currentUser.id) { %>
+              <form method="post" action="/admin/pengguna/<%= user.id %>/status" data-confirm="<%= user.is_active ? 'Nonaktifkan' : 'Aktifkan' %> akun <%= user.name %>?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button class="btn btn-<%= user.is_active ? 'danger' : 'outline' %> btn-sm" type="submit"><%= user.is_active ? 'Nonaktifkan' : 'Aktifkan' %></button>
+              </form>
+            <% } else { %>
+              <span class="tiny muted">Akun Anda</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/pengguna', queryParams: { q: filters.q, role: filters.role, status: filters.status }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

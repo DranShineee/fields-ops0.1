@@ -1,0 +1,67 @@
+<%- include('../partials/panel-start', { panelTitle: 'Work order', panelSub: 'Tinjau hasil pekerjaan teknisi. Menyelesaikan work order otomatis menghitung komisi.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/work-order">
+  <div class="field">
+    <label for="status">Status work order</label>
+    <select class="select" id="status" name="status">
+      <option value="">Semua</option>
+      <% Object.entries(f.WORK_ORDER_STATUS).forEach(([key, info]) => { %>
+        <option value="<%= key %>" <%= filters.status === key ? 'selected' : '' %>><%= info.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/work-order">Reset</a>
+</form>
+
+<% workOrders.forEach((work) => { %>
+  <article class="surface mb-2">
+    <div class="surface-body">
+      <div class="flex-between">
+        <div>
+          <strong><%= work.service_name %></strong>
+          <span class="table-note"><%= work.code %> · <%= work.technician_name %> · <%= formatRupiah(work.price) %></span>
+        </div>
+        <div class="flex-wrap">
+          <%- f.statusBadge(f.WORK_ORDER_STATUS, work.status) %>
+          <a class="chip" href="/admin/booking/<%= work.code %>">Booking</a>
+        </div>
+      </div>
+
+      <div class="split-even" style="margin-top:.7rem">
+        <div>
+          <p class="tiny muted mb-1">Instruksi</p>
+          <p class="small"><%= work.instructions || '—' %></p>
+          <p class="tiny muted mb-1">Temuan</p>
+          <p class="small"><%= work.findings || '—' %></p>
+        </div>
+        <div>
+          <p class="tiny muted mb-1">Tindakan</p>
+          <p class="small"><%= work.actions_taken || '—' %></p>
+          <p class="tiny muted mb-1">Bukti</p>
+          <p class="small">
+            <% if (work.evidence_url) { %><a class="link" href="<%= work.evidence_url %>" target="_blank" rel="noopener">Buka berkas bukti</a><% } else { %>Belum diunggah<% } %>
+          </p>
+          <p class="tiny muted mb-0">Mulai <%= work.started_at ? f.formatDateTime(work.started_at) : '—' %> · selesai <%= work.completed_at ? f.formatDateTime(work.completed_at) : '—' %></p>
+        </div>
+      </div>
+
+      <% if (work.status === 'submitted_for_review' || work.status === 'in_progress') { %>
+        <form method="post" action="/admin/work-order/<%= work.id %>/selesai" style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.8rem" data-confirm="Selesaikan <%= work.service_name %>? Komisi akan dihitung dan customer diminta mengulas.">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button class="btn btn-primary btn-sm" type="submit">Selesaikan &amp; hitung komisi</button>
+        </form>
+      <% } %>
+    </div>
+  </article>
+<% }); %>
+
+<% if (workOrders.length === 0) { %>
+  <div class="empty-state">
+    <span class="glyph">✓</span>
+    <h3>Tidak ada work order</h3>
+    <p>Work order dibuat otomatis saat admin menugaskan teknisi.</p>
+  </div>
+<% } %>
+
+<%- include('../partials/panel-end') %>

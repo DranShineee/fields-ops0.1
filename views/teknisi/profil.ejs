@@ -1,0 +1,62 @@
+<%- include('../partials/panel-start', { panelTitle: 'Profil teknisi', panelSub: 'Nama dan nomor WhatsApp ini yang dilihat customer saat Anda ditugaskan.' }) %>
+
+<div class="split">
+  <form method="post" action="/teknisi/profil" class="surface">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <div class="surface-head"><h2>Data yang tampil ke customer</h2></div>
+    <div class="surface-body">
+      <div class="field">
+        <label for="name">Nama lengkap</label>
+        <input class="input <%= errors.name ? 'has-error' : '' %>" type="text" id="name" name="name" value="<%= form.name || '' %>" required />
+        <% if (errors.name) { %><p class="error-text"><%= errors.name %></p><% } %>
+      </div>
+      <div class="field">
+        <label for="phone">Nomor WhatsApp</label>
+        <input class="input <%= errors.phone ? 'has-error' : '' %>" type="tel" id="phone" name="phone" value="<%= form.phone || '' %>" required />
+        <% if (errors.phone) { %><p class="error-text"><%= errors.phone %></p><% } %>
+      </div>
+      <div class="field">
+        <label for="bio">Bio singkat</label>
+        <textarea class="textarea <%= errors.bio ? 'has-error' : '' %>" id="bio" name="bio" rows="4" maxlength="400"><%= form.bio || '' %></textarea>
+        <% if (errors.bio) { %><p class="error-text"><%= errors.bio %></p><% } %>
+        <p class="help">Sebutkan keahlian spesifik, bukan klaim umum. Maksimal 400 karakter.</p>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="service_area">Area kerja</label>
+          <input class="input" type="text" id="service_area" name="service_area" value="<%= form.service_area || '' %>" />
+        </div>
+        <div class="field">
+          <label for="experience_years">Pengalaman (tahun)</label>
+          <input class="input <%= errors.experience ? 'has-error' : '' %>" type="number" id="experience_years" name="experience_years" min="0" max="60" value="<%= form.experience_years || 0 %>" />
+          <% if (errors.experience) { %><p class="error-text"><%= errors.experience %></p><% } %>
+        </div>
+      </div>
+      <button class="btn btn-primary" type="submit">Simpan profil</button>
+    </div>
+  </form>
+
+  <aside>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Status akun</h2></div>
+      <div class="surface-body">
+        <dl class="kv">
+          <div><dt>Kemitraan</dt><dd><%- f.statusBadge(f.TECHNICIAN_STATUS, profile.status) %></dd></div>
+          <div><dt>Email</dt><dd><%= currentUser.email %></dd></div>
+          <div><dt>KTP</dt><dd><%= profile.ktp_number ? '•••• •••• ' + profile.ktp_number.slice(-4) : '—' %></dd></div>
+        </dl>
+        <p class="tiny muted mt-2 mb-0">Perubahan pada data identitas dan dokumen dilakukan lewat halaman pengajuan.</p>
+        <a class="text-link mt-1" href="/teknisi/pengajuan">Buka pengajuan →</a>
+      </div>
+    </section>
+    <section class="surface">
+      <div class="surface-head"><h2>Ketersediaan</h2></div>
+      <div class="surface-body">
+        <p class="small muted">Atur hari dan jam kerja agar admin mempertimbangkannya saat menugaskan.</p>
+        <a class="btn btn-outline btn-sm" href="/teknisi/ketersediaan">Atur jadwal</a>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

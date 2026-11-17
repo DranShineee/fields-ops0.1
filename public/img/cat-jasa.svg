@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Jasa">
+  <rect width="640" height="400" fill="#f1ecfe"/>
+  <g fill="none" stroke="#6d28d9" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M258 262a40 40 0 0 1 0-80l34-34 46 46-34 34a40 40 0 0 1-46 34z"/>
+    <path d="M352 138l52 52"/>
+    <path d="M392 190l24-24 56 56-24 24z"/>
+  </g>
+</svg>

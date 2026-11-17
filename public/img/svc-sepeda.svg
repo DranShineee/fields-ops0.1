@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Servis sepeda">
+  <defs>
+    <linearGradient id="sbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f3b33"/>
+      <stop offset="0.55" stop-color="#2f5a4a"/>
+      <stop offset="1" stop-color="#182b25"/>
+    </linearGradient>
+    <radialGradient id="sglow" cx="0.78" cy="0.24" r="0.6">
+      <stop offset="0" stop-color="#ffd59d" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#ffd59d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#sbg)"/>
+  <rect width="640" height="400" fill="url(#sglow)"/>
+  <g stroke="#d8f2e7" stroke-opacity="0.7" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="196" cy="286" r="62"/>
+    <circle cx="452" cy="286" r="62"/>
+    <path d="M196 286l74-124h96l86 124"/>
+    <path d="M270 162l58 0 44 124"/>
+    <path d="M330 162l-14-38h72"/>
+    <path d="M388 124l54-8"/>
+    <path d="M270 162h120"/>
+  </g>
+  <g fill="#ffb066">
+    <rect x="118" y="96" width="84" height="8" rx="4"/>
+    <rect x="118" y="118" width="56" height="8" rx="4" opacity="0.6"/>
+  </g>
+</svg>

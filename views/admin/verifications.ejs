@@ -1,0 +1,104 @@
+<%- include('../partials/panel-start', { panelTitle: 'Verifikasi teknisi', panelSub: 'Tinjau pengajuan kemitraan dan kompetensi. Jangan menyetujui tanpa memeriksa dokumen.' }) %>
+
+<div class="stat-cards">
+  <div class="stat-card"><span class="stat-card-value"><%= counts.verifications || 0 %></span><span class="stat-card-label">Pengajuan menunggu</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= competencies.length %></span><span class="stat-card-label">Kompetensi menunggu</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= counts.payments || 0 %></span><span class="stat-card-label">Pembayaran menunggu</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= profiles.length %></span><span class="stat-card-label">Pengajuan ditampilkan</span></div>
+</div>
+
+<section class="surface mb-2">
+  <div class="surface-head"><h2>Pengajuan kemitraan</h2></div>
+  <div class="surface-body">
+    <% if (profiles.length === 0) { %>
+      <div class="empty-state" style="border:0;background:transparent;padding:1.4rem 0">
+        <span class="glyph">✓</span>
+        <h3>Tidak ada pengajuan</h3>
+        <p>Semua pengajuan sudah ditinjau.</p>
+      </div>
+    <% } else { %>
+      <% profiles.forEach((profile) => { %>
+        <article class="card card-pad" style="margin-bottom:1rem">
+          <div class="flex-between">
+            <div>
+              <strong><%= profile.name %></strong>
+              <span class="table-note"><%= profile.email %> · <%= profile.phone || '—' %> · mendaftar <%= f.formatDate(profile.registered_at) %></span>
+            </div>
+            <%- f.statusBadge(f.TECHNICIAN_STATUS, profile.status) %>
+          </div>
+
+          <div class="split-even" style="margin-top:.8rem;gap:1rem">
+            <dl class="kv">
+              <div><dt>Pengalaman</dt><dd><%= profile.experience_years %> tahun</dd></div>
+              <div><dt>Area kerja</dt><dd><%= profile.service_area || '—' %></dd></div>
+              <div><dt>KTP</dt><dd><%= profile.ktp_number ? '•••• •••• ' + profile.ktp_number.slice(-4) : '—' %></dd></div>
+              <div><dt>Dokumen</dt><dd>
+                <% if (profile.document_url) { %><a class="link" href="<%= profile.document_url %>" target="_blank" rel="noopener">Buka dokumen</a><% } else { %>—<% } %>
+              </dd></div>
+              <div><dt>Dikirim</dt><dd><%= profile.submitted_at ? f.formatDateTime(profile.submitted_at) : '—' %></dd></div>
+            </dl>
+            <div>
+              <p class="small"><strong>Bio:</strong> <%= profile.bio || '—' %></p>
+              <p class="small mb-1"><strong>Kompetensi:</strong></p>
+              <div class="flex-wrap">
+                <% (grouped[profile.user_id] || []).forEach((comp) => { %>
+                  <span class="chip"><%= comp.name %> · <%- f.statusBadge({ pending: {label:'menunggu',tone:'wait'}, approved: {label:'disetujui',tone:'done'}, rejected: {label:'ditolak',tone:'cancel'} }, comp.status) %></span>
+                <% }); %>
+                <% if (!(grouped[profile.user_id] || []).length) { %><span class="tiny muted">Belum ada pengajuan kompetensi.</span><% } %>
+              </div>
+              <% if (profile.review_note) { %><p class="tiny muted mt-1">Catatan sebelumnya: <%= profile.review_note %></p><% } %>
+            </div>
+          </div>
+
+          <form method="post" action="/admin/verifikasi/<%= profile.user_id %>" style="margin-top:.9rem;border-top:1px solid var(--line);padding-top:.9rem">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="field-row" style="align-items:end">
+              <div class="field" style="margin-bottom:.4rem">
+                <label for="note-<%= profile.user_id %>">Catatan untuk teknisi</label>
+                <input class="input" type="text" id="note-<%= profile.user_id %>" name="note" maxlength="400" placeholder="Wajib untuk revisi/penolakan, minimal 10 karakter" />
+              </div>
+              <div class="btn-row" style="padding-bottom:.4rem">
+                <button class="btn btn-primary btn-sm" type="submit" name="action" value="setujui">Setujui</button>
+                <button class="btn btn-outline btn-sm" type="submit" name="action" value="revisi">Minta revisi</button>
+                <button class="btn btn-danger btn-sm" type="submit" name="action" value="tolak">Tolak</button>
+              </div>
+            </div>
+          </form>
+        </article>
+      <% }); %>
+    <% } %>
+  </div>
+</section>
+
+<section class="surface">
+  <div class="surface-head"><h2>Kompetensi menunggu</h2><span class="chip"><%= competencies.length %></span></div>
+  <div class="surface-body">
+    <% if (competencies.length === 0) { %>
+      <p class="small muted mb-0">Tidak ada pengajuan kompetensi.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Teknisi</th><th>Kategori</th><th>Diajukan</th><th>Aksi</th></tr></thead>
+          <tbody>
+            <% competencies.forEach((row) => { %>
+              <tr>
+                <td><%= row.name %></td>
+                <td><strong><%= row.category_name %></strong></td>
+                <td class="small muted"><%= f.formatDate(row.created_at) %></td>
+                <td>
+                  <form method="post" action="/admin/verifikasi/kompetensi/<%= row.id %>" class="table-actions">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button class="btn btn-primary btn-sm" type="submit" name="action" value="setujui">Setujui</button>
+                    <button class="btn btn-ghost btn-sm" type="submit" name="action" value="tolak">Tolak</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/panel-end') %>

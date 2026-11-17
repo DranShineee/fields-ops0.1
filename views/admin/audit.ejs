@@ -1,0 +1,43 @@
+<%- include('../partials/panel-start', { panelTitle: 'Audit log', panelSub: 'Catatan aktivitas sensitif. Tidak dapat diedit atau dihapus dari antarmuka.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/audit">
+  <div class="field" style="flex:1;min-width:220px">
+    <label for="q">Cari aksi / deskripsi / aktor</label>
+    <input class="input" type="search" id="q" name="q" value="<%= filters.q %>" />
+  </div>
+  <div class="field">
+    <label for="entity">Entitas</label>
+    <select class="select" id="entity" name="entity">
+      <option value="">Semua</option>
+      <% entities.forEach((row) => { %>
+        <option value="<%= row.entity %>" <%= filters.entity === row.entity ? 'selected' : '' %>><%= row.entity %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/audit">Reset</a>
+</form>
+
+<div class="flex-between mb-1"><span class="tiny muted"><%= total %> entri</span></div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Waktu</th><th>Aktor</th><th>Aksi</th><th>Entitas</th><th>Deskripsi</th><th>IP</th></tr></thead>
+    <tbody>
+      <% logs.forEach((log) => { %>
+        <tr>
+          <td class="small"><%= f.formatDateTime(log.created_at) %></td>
+          <td class="small"><%= log.actor_name || 'sistem' %><span class="table-note"><%= log.actor_role || '—' %></span></td>
+          <td><span class="chip"><%= log.action %></span></td>
+          <td class="small mono"><%= log.entity %><% if (log.entity_id) { %> #<%= log.entity_id %><% } %></td>
+          <td class="small"><%= log.description %></td>
+          <td class="tiny muted mono"><%= log.ip || '—' %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/audit', queryParams: { q: filters.q, entity: filters.entity }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

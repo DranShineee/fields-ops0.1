@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Alat ukur">
+  <rect width="640" height="400" fill="#e6f7fb"/>
+  <g fill="none" stroke="#0e7490" stroke-width="11" stroke-linejoin="round">
+    <rect x="248" y="150" width="144" height="120" rx="14"/>
+    <path d="M276 200h88M276 226h56"/>
+    <path d="M392 210l52-38"/>
+    <path d="M444 172l22-16"/>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Peralatan">
+  <rect width="640" height="400" fill="#eaf1ff"/>
+  <g fill="none" stroke="#1d4ed8" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M258 148h74v104h-74z" rx="8"/>
+    <path d="M332 178h48l18 24v26h-66z"/>
+    <path d="M398 208h58l-14 28h-44z"/>
+    <path d="M238 168h20v64h-20z"/>
+    <path d="M286 252v34h22"/>
+  </g>
+</svg>

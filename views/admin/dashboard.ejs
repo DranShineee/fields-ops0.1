@@ -1,0 +1,119 @@
+<%- include('../partials/panel-start', { panelTitle: 'Dasbor admin', panelSub: 'Antrean verifikasi, booking, dan pembayaran yang perlu tindakan hari ini.' }) %>
+
+<div class="flex-between mb-2">
+  <div class="flex-wrap">
+    <a class="btn btn-outline btn-sm" href="/admin/verifikasi">Verifikasi teknisi <% if (counts.verifications) { %>(<%= counts.verifications %>)<% } %></a>
+    <a class="btn btn-outline btn-sm" href="/admin/transaksi">Pembayaran <em style="font-style:normal;color:var(--clay)"><%= counts.payments %></em></a>
+    <a class="btn btn-outline btn-sm" href="/admin/work-order">Tinjau pekerjaan <em style="font-style:normal;color:var(--clay)"><%= counts.reviews %></em></a>
+    <a class="btn btn-outline btn-sm" href="/admin/keluhan">Keluhan <em style="font-style:normal;color:var(--clay)"><%= counts.complaints %></em></a>
+  </div>
+  <a class="btn btn-primary btn-sm" href="/admin/booking">Kelola booking</a>
+</div>
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <span class="stat-card-value" style="font-size:1.25rem"><%= f.formatRupiah(revenue.paid || 0) %></span>
+    <span class="stat-card-label">Total pembayaran lunas</span>
+    <span class="stat-card-note">Bulan ini <%= f.formatRupiah(revenue.this_month || 0) %></span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value"><%= bookingStats.total || 0 %></span>
+    <span class="stat-card-label">Booking</span>
+    <span class="stat-card-note"><%= bookingStats.completed || 0 %> selesai · <%= bookingStats.cancelled || 0 %> batal</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value"><%= counts.unassigned || 0 %></span>
+    <span class="stat-card-label">Service order tanpa teknisi</span>
+    <span class="stat-card-note">Perlu penugasan</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value"><%= counts.payments || 0 %></span>
+    <span class="stat-card-label">Menunggu verifikasi bayar</span>
+    <span class="stat-card-note">Cek bukti transfer</span>
+  </div>
+</div>
+
+<div class="split">
+  <div>
+    <section class="surface mb-2">
+      <div class="surface-head">
+        <h2>Booking terbaru</h2>
+        <a class="text-link tiny" href="/admin/booking">Semua booking</a>
+      </div>
+      <div class="surface-body">
+        <% if (recentBookings.length === 0) { %>
+          <p class="small muted mb-0">Belum ada booking.</p>
+        <% } else { %>
+          <div class="table-wrap" style="border:0">
+            <table class="table">
+              <thead><tr><th>Kode</th><th>Customer</th><th>Jadwal</th><th>Status</th><th>Bayar</th></tr></thead>
+              <tbody>
+                <% recentBookings.forEach((booking) => { %>
+                  <tr>
+                    <td><a class="link mono" href="/admin/booking/<%= booking.code %>"><%= booking.code %></a><span class="table-note"><%= booking.item_count %> layanan</span></td>
+                    <td><%= booking.customer_name %><span class="table-note"><%= booking.city %></span></td>
+                    <td class="small"><%= f.formatDate(booking.scheduled_date) %><span class="table-note"><%= f.formatTime(booking.scheduled_time) %></span></td>
+                    <td><%- f.statusBadge(f.BOOKING_STATUS, booking.status) %></td>
+                    <td><%- f.statusBadge(f.PAYMENT_STATUS, booking.payment_status) %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Service order belum ditugaskan</h2><span class="chip"><%= pending.length %></span></div>
+      <div class="surface-body">
+        <% if (pending.length === 0) { %>
+          <p class="small muted mb-0">Semua service order sudah punya teknisi.</p>
+        <% } else { %>
+          <% pending.forEach((order) => { %>
+            <div class="flex-between" style="padding:.55rem 0;border-bottom:1px solid var(--line)">
+              <div class="small">
+                <strong><%= order.service_name %></strong>
+                <span class="table-note"><%= order.code %> · <%= order.category_name %> · <%= f.formatDate(order.scheduled_date) %></span>
+              </div>
+              <a class="btn btn-outline btn-sm" href="/admin/booking/<%= order.code %>">Tugaskan</a>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Teknisi paling produktif</h2></div>
+      <div class="surface-body">
+        <% if (topTechs.length === 0) { %>
+          <p class="small muted mb-0">Belum ada teknisi disetujui.</p>
+        <% } else { %>
+          <% topTechs.forEach((tech) => { %>
+            <div class="flex-between" style="padding:.45rem 0;border-bottom:1px solid var(--line)">
+              <span class="small"><%= tech.name %><span class="table-note"><%= tech.jobs %> pekerjaan · ★ <%= tech.rating %>​</span></span>
+              <%- f.statusBadge(f.TECHNICIAN_STATUS, tech.status) %>
+            </div>
+          <% }); %>
+        <% } %>
+        <a class="text-link mt-2" href="/admin/teknisi">Data teknisi →</a>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Aktivitas terakhir</h2><a class="text-link tiny" href="/admin/audit">Audit</a></div>
+      <div class="surface-body">
+        <% recentAudit.forEach((row) => { %>
+          <div style="padding:.4rem 0;border-bottom:1px solid var(--line)">
+            <span class="small"><%= row.description %></span>
+            <span class="table-note"><%= row.actor_name || 'sistem' %> · <%= f.formatDateTime(row.created_at) %></span>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

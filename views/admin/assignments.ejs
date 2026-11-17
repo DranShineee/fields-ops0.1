@@ -1,0 +1,40 @@
+<%- include('../partials/panel-start', { panelTitle: 'Penugasan', panelSub: 'Riwayat penawaran teknisi, termasuk yang ditolak dan dialihkan.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/penugasan">
+  <div class="field">
+    <label for="status">Status penugasan</label>
+    <select class="select" id="status" name="status">
+      <option value="">Semua</option>
+      <% Object.entries(f.ASSIGNMENT_STATUS).forEach(([key, info]) => { %>
+        <option value="<%= key %>" <%= filters.status === key ? 'selected' : '' %>><%= info.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/penugasan">Reset</a>
+</form>
+
+<div class="flex-between mb-1"><span class="tiny muted"><%= total %> penugasan</span></div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Layanan</th><th>Booking</th><th>Teknisi</th><th>Status</th><th>Alasan</th><th>Waktu</th><th></th></tr></thead>
+    <tbody>
+      <% assignments.forEach((row) => { %>
+        <tr>
+          <td><strong><%= row.service_name %></strong><span class="table-note"><%= row.city %> · <%= f.formatDate(row.scheduled_date) %></span></td>
+          <td class="mono"><a class="link" href="/admin/booking/<%= row.code %>"><%= row.code %></a></td>
+          <td class="small"><%= row.technician_name %><span class="table-note">ditugaskan oleh <%= row.assigned_by_name || 'sistem' %></span></td>
+          <td><%- f.statusBadge(f.ASSIGNMENT_STATUS, row.status) %></td>
+          <td class="small muted"><%= row.reason || '—' %></td>
+          <td class="small muted"><%= f.formatDateTime(row.responded_at || row.created_at) %></td>
+          <td><a class="text-link" href="/admin/booking/<%= row.code %>">Buka</a></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/penugasan', queryParams: { status: filters.status }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

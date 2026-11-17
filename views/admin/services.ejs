@@ -1,0 +1,62 @@
+<%- include('../partials/panel-start', { panelTitle: 'Kelola layanan', panelSub: 'Harga, cakupan, dan status tayang setiap layanan.' }) %>
+
+<div class="flex-between mb-2">
+  <form class="filter-bar" method="get" action="/admin/layanan" style="margin:0;border:0;padding:0">
+    <div class="field">
+      <label for="q">Cari</label>
+      <input class="input" type="search" id="q" name="q" value="<%= filters.q %>" placeholder="nama layanan" />
+    </div>
+    <div class="field">
+      <label for="kategori">Kategori</label>
+      <select class="select" id="kategori" name="kategori">
+        <option value="">Semua</option>
+        <% categories.forEach((cat) => { %>
+          <option value="<%= cat.id %>" <%= filters.kategori === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="status">Status</label>
+      <select class="select" id="status" name="status">
+        <option value="">Semua</option>
+        <option value="aktif" <%= filters.status === 'aktif' ? 'selected' : '' %>>Aktif</option>
+        <option value="nonaktif" <%= filters.status === 'nonaktif' ? 'selected' : '' %>>Nonaktif</option>
+      </select>
+    </div>
+    <button class="btn btn-outline btn-sm" type="submit">Filter</button>
+  </form>
+  <a class="btn btn-primary" href="/admin/layanan/baru">+ Layanan baru</a>
+</div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Layanan</th><th>Kategori</th><th>Harga</th><th>Durasi</th><th>Status</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <% services.forEach((service) => { %>
+        <tr>
+          <td>
+            <strong><%= service.name %></strong>
+            <span class="table-note"><%= service.is_featured ? 'Unggulan · ' : '' %><%= service.price_type === 'estimate' ? 'estimasi' : 'harga tetap' %></span>
+          </td>
+          <td><%= service.category_name %></td>
+          <td><%= formatRupiah(service.price) %></td>
+          <td class="small muted"><%= service.duration_minutes %> menit</td>
+          <td><%- f.statusBadge({ aktif: { label: 'Aktif', tone: 'done' }, nonaktif: { label: 'Nonaktif', tone: 'cancel' } }, service.is_active ? 'aktif' : 'nonaktif') %></td>
+          <td>
+            <div class="table-actions">
+              <a class="btn btn-ghost btn-sm" href="/admin/layanan/<%= service.id %>/edit">Edit</a>
+              <form method="post" action="/admin/layanan/<%= service.id %>/toggle" data-confirm="<%= service.is_active ? 'Nonaktifkan' : 'Aktifkan' %> layanan <%= service.name %>?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <button class="btn btn-ghost btn-sm" type="submit"><%= service.is_active ? 'Nonaktifkan' : 'Aktifkan' %></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/layanan', queryParams: { q: filters.q, kategori: filters.kategori || '', status: filters.status }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

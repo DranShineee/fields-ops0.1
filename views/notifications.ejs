@@ -1,0 +1,62 @@
+<% if (currentUser.role === 'customer') { %>
+  <%- include('partials/head', { title: 'Notifikasi', description: 'Pemberitahuan status booking dan pekerjaan Anda.' }) %>
+  <%- include('partials/site-header') %>
+  <main id="main" class="wrap wrap-narrow">
+<% } else { %>
+  <%- include('partials/panel-start', { panelTitle: 'Notifikasi', panelSub: 'Pemberitahuan pekerjaan, penugasan, dan pembayaran.' }) %>
+<% } %>
+
+<div style="padding:1.6rem 0 3rem">
+  <div class="flex-between mb-2">
+    <div>
+      <p class="eyebrow"><%= unreadCount %> belum dibaca</p>
+      <h1 class="h2" style="font-size:1.7rem">Kotak masuk</h1>
+    </div>
+    <% if (notifications.length) { %>
+      <form method="post" action="/notifikasi/baca-semua">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="btn btn-outline btn-sm" type="submit">Tandai semua dibaca</button>
+      </form>
+    <% } %>
+  </div>
+
+  <% if (notifications.length === 0) { %>
+    <div class="empty-state">
+      <span class="glyph">◷</span>
+      <h3>Tidak ada notifikasi</h3>
+      <p>Kami akan memberi tahu saat ada penugasan, perubahan status pekerjaan, atau pembayaran yang perlu dicek.</p>
+    </div>
+  <% } else { %>
+    <% notifications.forEach((item) => { %>
+      <article class="card card-pad" style="margin-bottom:.6rem;border-left:3px solid <%= item.is_read ? 'var(--line)' : 'var(--clay)' %>">
+        <div class="flex-between">
+          <strong><%= item.title %></strong>
+          <span class="tiny muted"><%= f.formatDateTime(item.created_at) %></span>
+        </div>
+        <% if (item.body) { %><p class="small muted" style="margin:.35rem 0 .6rem"><%= item.body %></p><% } %>
+        <div class="btn-row">
+          <% if (item.link) { %>
+            <form method="post" action="/notifikasi/<%= item.id %>/baca">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <button class="btn btn-outline btn-sm" type="submit">Buka</button>
+            </form>
+          <% } else if (!item.is_read) { %>
+            <form method="post" action="/notifikasi/<%= item.id %>/baca">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <button class="btn btn-ghost btn-sm" type="submit">Tandai dibaca</button>
+            </form>
+          <% } %>
+          <% if (!item.is_read) { %><span class="chip">Baru</span><% } %>
+        </div>
+      </article>
+    <% }); %>
+    <%- include('partials/pagination', { baseUrl: '/notifikasi', queryParams: {}, page, pages }) %>
+  <% } %>
+</div>
+
+<% if (currentUser.role === 'customer') { %>
+  </main>
+  <%- include('partials/site-footer') %>
+<% } else { %>
+  <%- include('partials/panel-end') %>
+<% } %>

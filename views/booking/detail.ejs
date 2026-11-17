@@ -1,0 +1,165 @@
+<%- include('../partials/head', { title: 'Booking ' + booking.code, description: 'Pantau status booking, teknisi yang ditugaskan, dan rincian pembayaran.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div style="padding:1.8rem 0 1rem">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/akun">Akun</a><span aria-hidden="true">/</span><span> Booking</span>
+    </nav>
+    <div class="flex-between">
+      <div>
+        <p class="eyebrow">Kode booking</p>
+        <h1 class="h2" style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap">
+          <span class="mono"><%= booking.code %></span>
+          <button type="button" class="chip" data-copy="<%= booking.code %>">Salin</button>
+        </h1>
+        <p class="muted"><%= f.formatDateLong(booking.scheduled_date) %> · <%= f.formatTime(booking.scheduled_time) %> WIB · <%= booking.city %></p>
+      </div>
+      <div class="flex-wrap">
+        <%- f.statusBadge(f.BOOKING_STATUS, booking.status) %>
+        <%- f.statusBadge(f.PAYMENT_STATUS, booking.payment_status) %>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="detail-grid" style="padding-bottom:2.5rem">
+    <div>
+      <div class="card mb-2">
+        <div class="card-head">
+          <h2>Pekerjaan dalam booking ini</h2>
+          <span class="chip"><%= orders.length %> item</span>
+        </div>
+        <div class="card-body">
+          <% orders.forEach((order) => { %>
+            <div class="so-card">
+              <div class="so-top">
+                <div>
+                  <strong><%= order.service_name %></strong>
+                  <span class="table-note"><%= order.category_name %> · <%= formatRupiah(order.price) %> · <%= order.price_type === 'estimate' ? 'estimasi' : 'harga tetap' %></span>
+                </div>
+                <%- f.statusBadge(f.SERVICE_ORDER_STATUS, order.status) %>
+              </div>
+
+              <% if (order.technician_name) { %>
+                <div class="flex-wrap" style="margin-top:.7rem;border-top:1px solid var(--line);padding-top:.6rem">
+                  <span class="avatar" aria-hidden="true"><%= f.initials(order.technician_name) %></span>
+                  <span class="small"><strong><%= order.technician_name %></strong><br /><span class="tiny muted">Teknisi ditugaskan</span></span>
+                  <% if (order.technician_phone) { %>
+                    <a class="chip" href="<%= f.waLink(order.technician_phone, 'Halo, saya customer booking ' + booking.code) %>" target="_blank" rel="noopener" style="margin-left:auto">WhatsApp teknisi</a>
+                  <% } %>
+                </div>
+              <% } else { %>
+                <p class="tiny muted" style="margin:.6rem 0 0">Admin belum menugaskan teknisi untuk item ini.</p>
+              <% } %>
+
+              <% if (order.evidence_url) { %>
+                <p class="small" style="margin:.6rem 0 0"><a class="link" href="<%= order.evidence_url %>" target="_blank" rel="noopener">Lihat bukti pekerjaan</a></p>
+              <% } %>
+
+              <% if (order.status === 'completed' && !order.review_id && order.technician_id) { %>
+                <div style="margin-top:.7rem">
+                  <a class="btn btn-outline btn-sm" href="/booking/<%= booking.code %>/ulasan/<%= order.id %>">Beri ulasan</a>
+                </div>
+              <% } else if (order.review_id) { %>
+                <p class="tiny muted" style="margin:.6rem 0 0">Anda memberi <%= order.review_rating %> bintang untuk pekerjaan ini.</p>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <div class="card mb-2">
+        <div class="card-head"><h2>Alamat &amp; catatan</h2></div>
+        <div class="card-body">
+          <dl class="kv">
+            <div><dt>Alamat</dt><dd><%= booking.address %></dd></div>
+            <div><dt>Kota</dt><dd><%= booking.city %><%= booking.postal_code ? ' · ' + booking.postal_code : '' %></dd></div>
+            <div><dt>Catatan</dt><dd><%= booking.notes || '—' %></dd></div>
+            <div><dt>Dibuat</dt><dd><%= f.formatDateTime(booking.created_at) %></dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <% if (timeline.length) { %>
+        <div class="card mb-2">
+          <div class="card-head"><h2>Riwayat status</h2></div>
+          <div class="card-body">
+            <ol class="timeline">
+              <% timeline.forEach((row) => { %>
+                <li class="timeline-item">
+                  <strong><%= f.SERVICE_ORDER_STATUS[row.to_status] ? f.SERVICE_ORDER_STATUS[row.to_status].label : (f.BOOKING_STATUS[row.to_status] ? f.BOOKING_STATUS[row.to_status].label : row.to_status) %></strong>
+                  <small><%= f.formatDateTime(row.created_at) %><%= row.actor_name ? ' · ' + row.actor_name : '' %></small>
+                  <% if (row.note) { %><br /><small><%= row.note %></small><% } %>
+                </li>
+              <% }); %>
+            </ol>
+          </div>
+        </div>
+      <% } %>
+
+      <% if (complaint) { %>
+        <div class="notice">
+          <h3>Keluhan <%= complaint.code %> · <%- f.statusBadge(f.COMPLAINT_STATUS, complaint.status) %></h3>
+          <p class="small muted mb-1"><%= complaint.subject %></p>
+          <% if (complaint.response) { %><p class="small mb-0"><strong>Tanggapan admin:</strong> <%= complaint.response %></p><% } %>
+        </div>
+      <% } %>
+    </div>
+
+    <aside class="sticky-card">
+      <div class="card mb-2">
+        <div class="card-head"><h2>Ringkasan biaya</h2></div>
+        <div class="card-body">
+          <dl class="kv">
+            <div><dt>Subtotal</dt><dd><%= formatRupiah(booking.subtotal) %></dd></div>
+            <div><dt>Total</dt><dd><strong><%= formatRupiah(booking.total) %></strong></dd></div>
+            <div><dt>Metode</dt><dd><%= f.PAYMENT_METHOD_LABELS[booking.payment_method] %></dd></div>
+            <% if (booking.payment_channel) { %><div><dt>Kanal</dt><dd><%= f.PAYMENT_CHANNEL_LABELS[booking.payment_channel] %></dd></div><% } %>
+            <div><dt>Status bayar</dt><dd><%- f.statusBadge(f.PAYMENT_STATUS, booking.payment_status) %></dd></div>
+          </dl>
+
+          <% if (booking.payment_method === 'full' && booking.payment_status === 'unpaid' && booking.status !== 'cancelled') { %>
+            <a class="btn btn-clay btn-block mt-2" href="/booking/<%= booking.code %>/bayar">Bayar sekarang</a>
+          <% } else if (booking.payment_status === 'pending_verification') { %>
+            <p class="notice small" style="margin:1rem 0 0">Bukti pembayaran sedang diperiksa admin. Anda akan mendapat notifikasi.</p>
+          <% } else if (booking.payment_method === 'cod' && booking.payment_status === 'unpaid') { %>
+            <p class="notice small" style="margin:1rem 0 0"><%= settings.cod_note %></p>
+          <% } else if (booking.payment_status === 'paid') { %>
+            <p class="notice small" style="margin:1rem 0 0">Pembayaran lunas. Terima kasih.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="card card-pad mb-2">
+        <h2 class="h3" style="font-size:.95rem">Butuh bantuan?</h2>
+        <p class="tiny muted">Sebutkan kode <%= booking.code %> agar admin cepat menemukan booking Anda.</p>
+        <div class="btn-row">
+          <a class="btn btn-outline btn-sm" href="/keluhan">Ajukan keluhan</a>
+          <% if (adminContact && adminContact.phone) { %>
+            <a class="btn btn-ghost btn-sm" href="<%= f.waLink(adminContact.phone, 'Halo admin, saya butuh bantuan untuk booking ' + booking.code) %>" target="_blank" rel="noopener">WhatsApp admin</a>
+          <% } %>
+        </div>
+      </div>
+
+      <% if (canCancel) { %>
+        <details class="card card-pad">
+          <summary style="cursor:pointer;font-size:.9rem;font-weight:600">Batalkan booking</summary>
+          <form method="post" action="/booking/<%= booking.code %>/batal" style="margin-top:.8rem" data-confirm="Batalkan booking <%= booking.code %>?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="field">
+              <label for="reason">Alasan pembatalan</label>
+              <textarea class="textarea" id="reason" name="reason" rows="2" minlength="5" required style="min-height:64px" placeholder="mis. jadwal berubah, sudah ditangani sendiri"></textarea>
+            </div>
+            <button class="btn btn-danger btn-sm" type="submit">Kirim pembatalan</button>
+          </form>
+        </details>
+      <% } else if (booking.status === 'in_progress') { %>
+        <p class="tiny muted">Pekerjaan sudah berjalan. Untuk pembatalan, ajukan keluhan agar admin menengahi.</p>
+      <% } %>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/site-footer') %>

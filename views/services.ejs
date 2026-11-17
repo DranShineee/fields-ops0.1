@@ -1,0 +1,94 @@
+<%- include('partials/head', { title: title, description: 'Telusuri layanan perbaikan AC, sepeda motor, komputer, dan sepeda. Harga dan cakupan kerja ditulis jelas sebelum Anda pesan.' }) %>
+<%- include('partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div class="page-head">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Beranda</a><span aria-hidden="true">/</span><span>Layanan</span>
+      </nav>
+      <h1><%= activeCategory ? 'Layanan ' + activeCategory.name : 'Semua layanan' %></h1>
+      <p><%= activeCategory ? activeCategory.description : 'Pilih pekerjaan yang paling dekat dengan keluhan Anda. Harga tetap ditandai jelas; estimasi awal berarti biaya final menyesuaikan temuan teknisi.' %></p>
+    </div>
+    <span class="chip"><%= total %> layanan ditemukan</span>
+  </div>
+
+  <form class="filter-bar" method="get" action="/layanan" role="search">
+    <div class="field" style="flex:1;min-width:220px">
+      <label for="q">Cari keluhan atau layanan</label>
+      <input class="input" type="search" id="q" name="q" value="<%= filters.q %>" placeholder="mis. freon, laptop mati, rem" />
+    </div>
+    <div class="field">
+      <label for="kategori">Kategori</label>
+      <select class="select" id="kategori" name="kategori">
+        <option value="">Semua kategori</option>
+        <% categories.forEach((cat) => { %>
+          <option value="<%= cat.slug %>" <%= filters.kategori === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="maks">Harga maksimum</label>
+      <select class="select" id="maks" name="maks">
+        <option value="">Tanpa batas</option>
+        <% [100000, 200000, 300000, 500000].forEach((value) => { %>
+          <option value="<%= value %>" <%= filters.maks === value ? 'selected' : '' %>>≤ <%= formatRupiah(value) %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div class="field">
+      <label for="sort">Urutkan</label>
+      <select class="select" id="sort" name="sort">
+        <option value="relevan" <%= filters.sort === 'relevan' ? 'selected' : '' %>>Paling relevan</option>
+        <option value="termurah" <%= filters.sort === 'termurah' ? 'selected' : '' %>>Termurah</option>
+        <option value="termahal" <%= filters.sort === 'termahal' ? 'selected' : '' %>>Termahal</option>
+        <option value="terbaru" <%= filters.sort === 'terbaru' ? 'selected' : '' %>>Terbaru</option>
+      </select>
+    </div>
+    <div class="field">
+      <button class="btn btn-primary" type="submit">Terapkan</button>
+    </div>
+    <% if (filters.q || filters.kategori || filters.maks || filters.sort !== 'relevan') { %>
+      <a class="btn btn-ghost btn-sm" href="/layanan">Reset</a>
+    <% } %>
+  </form>
+
+  <% if (services.length === 0) { %>
+    <div class="empty-state">
+      <span class="glyph" aria-hidden="true">?</span>
+      <h3>Tidak ada layanan yang cocok</h3>
+      <p>Coba kata kunci yang lebih umum, longgarkan batas harga, atau buka semua kategori.</p>
+      <div class="btn-row" style="justify-content:center;margin-top:1rem">
+        <a class="btn btn-outline btn-sm" href="/layanan">Lihat semua layanan</a>
+        <a class="btn btn-ghost btn-sm" href="/keluhan">Tanyakan ke admin</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="service-grid">
+      <% services.forEach((item, index) => { %>
+        <a class="service-card reveal" href="/layanan/<%= item.slug %>">
+          <div class="service-media">
+            <img src="<%= item.image_url %>" alt="Ilustrasi <%= item.category_name %>" loading="<%= index < 3 ? 'eager' : 'lazy' %>" />
+            <span class="cat-tag"><%= item.category_name %></span>
+          </div>
+          <div class="service-body">
+            <h3><%= item.name %></h3>
+            <p><%= item.description %></p>
+            <div class="service-foot">
+              <span class="price"><%= formatRupiah(item.price) %> <small><%= item.price_type === 'estimate' ? 'estimasi' : 'tetap' %></small></span>
+              <%- f.stars(item.rating) %>
+            </div>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+
+    <%- include('partials/pagination', {
+      baseUrl: '/layanan',
+      queryParams: { q: filters.q, kategori: filters.kategori, maks: filters.maks || '', sort: filters.sort },
+      page, pages
+    }) %>
+  <% } %>
+</main>
+
+<%- include('partials/site-footer') %>

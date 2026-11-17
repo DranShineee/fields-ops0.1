@@ -1,0 +1,86 @@
+<%- include('head', { title: title, description: 'Panel ' + f.roleLabel(currentUser.role) + ' FieldsOps.' }) %>
+
+<div class="panel">
+  <aside class="panel-sidebar" aria-label="Navigasi panel">
+    <div class="sidebar-head">
+      <a class="brand" href="<%= currentUser.role === 'admin' ? '/admin' : '/teknisi' %>">
+        <span class="brand-mark" aria-hidden="true">F.</span>
+        <span class="brand-text">
+          <strong>FieldsOps</strong>
+          <small><%= currentUser.role === 'admin' ? 'Back office' : 'Mitra teknisi' %></small>
+        </span>
+      </a>
+      <span class="sidebar-role"><%= f.roleLabel(currentUser.role) %></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <% if (currentUser.role === 'technician') { %>
+        <% const items = [
+          ['/teknisi', 'Dasbor', true],
+          ['/teknisi/pengajuan', 'Pengajuan & status', false],
+          ['/teknisi/profil', 'Profil', false],
+          ['/teknisi/kompetensi', 'Kompetensi', false],
+          ['/teknisi/ketersediaan', 'Ketersediaan', false],
+          ['/teknisi/penugasan', 'Penugasan masuk', false],
+          ['/teknisi/pekerjaan', 'Pekerjaan aktif', false],
+          ['/teknisi/riwayat', 'Riwayat', false],
+          ['/teknisi/pendapatan', 'Pendapatan', false],
+          ['/notifikasi', 'Notifikasi', false],
+          ['/teknisi/pengaturan', 'Pengaturan', false],
+        ]; %>
+        <% items.forEach(([href, label, exact]) => { %>
+          <a href="<%= href %>" class="sidebar-link <%= (exact ? currentPath === href : currentPath.startsWith(href)) ? 'active' : '' %>"><%= label %></a>
+        <% }); %>
+      <% } else { %>
+        <p class="sidebar-title">Ringkasan</p>
+        <a href="/admin" class="sidebar-link <%= currentPath === '/admin' ? 'active' : '' %>">Dasbor</a>
+        <a href="/admin/laporan" class="sidebar-link <%= currentPath.startsWith('/admin/laporan') ? 'active' : '' %>">Laporan</a>
+
+        <p class="sidebar-title">Operasional</p>
+        <a href="/admin/booking" class="sidebar-link <%= currentPath.startsWith('/admin/booking') ? 'active' : '' %>">Booking</a>
+        <a href="/admin/service-order" class="sidebar-link <%= currentPath.startsWith('/admin/service-order') ? 'active' : '' %>">Service order</a>
+        <a href="/admin/penugasan" class="sidebar-link <%= currentPath.startsWith('/admin/penugasan') ? 'active' : '' %>">Penugasan</a>
+        <a href="/admin/work-order" class="sidebar-link <%= currentPath.startsWith('/admin/work-order') ? 'active' : '' %>">Work order</a>
+        <a href="/admin/transaksi" class="sidebar-link <%= currentPath.startsWith('/admin/transaksi') ? 'active' : '' %>">Transaksi</a>
+        <a href="/admin/komisi" class="sidebar-link <%= currentPath.startsWith('/admin/komisi') ? 'active' : '' %>">Komisi</a>
+
+        <p class="sidebar-title">Mitra & katalog</p>
+        <a href="/admin/verifikasi" class="sidebar-link <%= currentPath.startsWith('/admin/verifikasi') ? 'active' : '' %>">Verifikasi teknisi</a>
+        <a href="/admin/teknisi" class="sidebar-link <%= currentPath.startsWith('/admin/teknisi') ? 'active' : '' %>">Data teknisi</a>
+        <a href="/admin/kategori" class="sidebar-link <%= currentPath.startsWith('/admin/kategori') ? 'active' : '' %>">Kategori</a>
+        <a href="/admin/layanan" class="sidebar-link <%= currentPath.startsWith('/admin/layanan') ? 'active' : '' %>">Layanan</a>
+
+        <p class="sidebar-title">Lainnya</p>
+        <a href="/admin/pengguna" class="sidebar-link <%= currentPath.startsWith('/admin/pengguna') ? 'active' : '' %>">Pengguna</a>
+        <a href="/admin/ulasan" class="sidebar-link <%= currentPath.startsWith('/admin/ulasan') ? 'active' : '' %>">Ulasan</a>
+        <a href="/admin/keluhan" class="sidebar-link <%= currentPath.startsWith('/admin/keluhan') ? 'active' : '' %>">Keluhan</a>
+        <a href="/admin/audit" class="sidebar-link <%= currentPath.startsWith('/admin/audit') ? 'active' : '' %>">Audit log</a>
+        <a href="/admin/pengaturan" class="sidebar-link <%= currentPath.startsWith('/admin/pengaturan') ? 'active' : '' %>">Pengaturan</a>
+      <% } %>
+    </nav>
+
+    <div class="sidebar-foot">
+      <a class="text-link" href="/">← Lihat situs publik</a>
+      <form method="post" action="/logout" class="mt-2">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit" class="btn btn-ghost btn-sm btn-block">Keluar</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="panel-main">
+    <header class="panel-head">
+      <div>
+        <h1 class="panel-title"><%= panelTitle %></h1>
+        <% if (typeof panelSub !== 'undefined' && panelSub) { %><p class="panel-sub"><%= panelSub %></p><% } %>
+      </div>
+      <div class="panel-actions">
+        <a href="/notifikasi" class="icon-btn" aria-label="Notifikasi<%= unreadCount ? ' (' + unreadCount + ' belum dibaca)' : '' %>">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <% if (unreadCount) { %><span class="dot" aria-hidden="true"></span><% } %>
+        </a>
+        <span class="chip"><%= currentUser.name %></span>
+      </div>
+    </header>
+    <div class="panel-body">
+      <%- include('flash') %>

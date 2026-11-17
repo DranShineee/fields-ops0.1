@@ -1,0 +1,116 @@
+<%- include('../partials/panel-start', { panelTitle: 'Pengajuan kemitraan', panelSub: 'Data ini diverifikasi admin sebelum Anda bisa menerima pekerjaan.' }) %>
+
+<div class="split">
+  <div>
+    <section class="surface mb-2">
+      <div class="surface-head">
+        <h2>Status pengajuan</h2>
+        <%- f.statusBadge(f.TECHNICIAN_STATUS, profile ? profile.status : 'pending') %>
+      </div>
+      <div class="surface-body">
+        <% if (!profile) { %>
+          <p class="small muted">Profil teknisi belum dibuat. Hubungi admin bila ini tidak seharusnya terjadi.</p>
+        <% } else { %>
+          <p class="small muted">
+            <% if (profile.status === 'pending') { %>Lengkapi formulir di bawah lalu kirim untuk ditinjau admin.
+            <% } else if (profile.status === 'under_review') { %>Pengajuan sedang ditinjau admin. Anda akan mendapat notifikasi hasilnya.
+            <% } else if (profile.status === 'revision_required') { %>Ada bagian yang perlu diperbaiki. Lihat catatan admin, perbarui, lalu kirim ulang.
+            <% } else if (profile.status === 'rejected') { %>Pengajuan ditolak. Anda masih bisa memperbaiki data dan mengirim ulang.
+            <% } else if (profile.status === 'suspended') { %>Kemitraan ditangguhkan. Hubungi admin untuk klarifikasi.
+            <% } else { %>Kemitraan aktif. Anda bisa menerima penugasan sesuai kompetensi yang disetujui.
+            <% } %>
+          </p>
+          <% if (profile.review_note) { %>
+            <div class="notice"><h3>Catatan admin</h3><p class="mb-0"><%= profile.review_note %></p></div>
+          <% } %>
+          <dl class="kv">
+            <div><dt>Dikirim</dt><dd><%= profile.submitted_at ? f.formatDateTime(profile.submitted_at) : '—' %></dd></div>
+            <div><dt>Ditinjau</dt><dd><%= profile.reviewed_at ? f.formatDateTime(profile.reviewed_at) : '—' %></dd></div>
+            <div><dt>Dokumen</dt><dd><%= profile.document_url ? 'Sudah diunggah' : 'Belum ada' %></dd></div>
+            <div><dt>KTP</dt><dd><%= profile.ktp_number ? '•••• •••• ' + profile.ktp_number.slice(-4) : '—' %></dd></div>
+          </dl>
+        <% } %>
+      </div>
+    </section>
+
+    <% if (!profile || profile.status !== 'approved') { %>
+      <form method="post" action="/teknisi/pengajuan" enctype="multipart/form-data" class="surface">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="surface-head"><h2>Formulir pengajuan</h2></div>
+        <div class="surface-body">
+          <div class="field">
+            <label for="bio">Pengalaman &amp; keahlian</label>
+            <textarea class="textarea <%= errors.bio ? 'has-error' : '' %>" id="bio" name="bio" rows="4" required placeholder="Contoh: 6 tahun servis AC split dan cassette, biasa menangani bocor freon dan kelistrikan."><%= profile ? profile.bio || '' : '' %></textarea>
+            <% if (errors.bio) { %><p class="error-text"><%= errors.bio %></p><% } %>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="experience_years">Pengalaman (tahun)</label>
+              <input class="input <%= errors.experience ? 'has-error' : '' %>" type="number" id="experience_years" name="experience_years" min="0" max="60" value="<%= profile ? profile.experience_years : 0 %>" required />
+              <% if (errors.experience) { %><p class="error-text"><%= errors.experience %></p><% } %>
+            </div>
+            <div class="field">
+              <label for="ktp_number">Nomor KTP (16 angka)</label>
+              <input class="input <%= errors.ktp ? 'has-error' : '' %>" type="text" id="ktp_number" name="ktp_number" inputmode="numeric" maxlength="16" value="<%= profile ? profile.ktp_number || '' : '' %>" required />
+              <% if (errors.ktp) { %><p class="error-text"><%= errors.ktp %></p><% } %>
+              <p class="help">Hanya admin berwenang yang dapat membuka dokumen identitas.</p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="service_area">Area kerja</label>
+            <input class="input <%= errors.area ? 'has-error' : '' %>" type="text" id="service_area" name="service_area" value="<%= profile ? profile.service_area || '' : '' %>" placeholder="mis. Jakarta Selatan, Depok, Bekasi" required />
+            <% if (errors.area) { %><p class="error-text"><%= errors.area %></p><% } %>
+          </div>
+          <div class="dropzone">
+            <label for="document">Scan KTP / sertifikat <span class="muted">(JPG, PNG, PDF — maks 3 MB)</span></label>
+            <input type="file" id="document" name="document" accept="image/jpeg,image/png,image/webp,application/pdf" data-file-input="document" />
+            <p class="tiny muted mt-1 mb-0" data-file-name="document"><%= profile && profile.document_url ? 'Dokumen sudah ada, pilih berkas untuk mengganti.' : 'Belum ada berkas dipilih' %></p>
+            <% if (errors.document) { %><p class="error-text"><%= errors.document %></p><% } %>
+          </div>
+          <button class="btn btn-primary mt-2" type="submit">Kirim untuk verifikasi</button>
+          <p class="tiny muted mt-1 mb-0">Mengirim ulang akan mengubah status menjadi “sedang ditinjau”.</p>
+        </div>
+      </form>
+    <% } %>
+  </div>
+
+  <aside>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Kompetensi diajukan</h2></div>
+      <div class="surface-body">
+        <% if (competencies.length === 0) { %>
+          <p class="small muted">Belum ada kompetensi. Buka <a class="link" href="/teknisi/kompetensi">Kompetensi</a> untuk mengajukan kategori.</p>
+        <% } else { %>
+          <% competencies.forEach((row) => { %>
+            <div class="flex-between" style="padding:.45rem 0;border-bottom:1px solid var(--line)">
+              <span class="small"><%= row.name %></span>
+              <%- f.statusBadge({ pending: { label: 'Menunggu', tone: 'wait' }, approved: { label: 'Disetujui', tone: 'done' }, rejected: { label: 'Ditolak', tone: 'cancel' } }, row.status) %>
+            </div>
+          <% }); %>
+        <% } %>
+        <a class="text-link mt-2" href="/teknisi/kompetensi">Kelola kompetensi →</a>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Riwayat status</h2></div>
+      <div class="surface-body">
+        <% if (history.length === 0) { %>
+          <p class="small muted mb-0">Belum ada perubahan status.</p>
+        <% } else { %>
+          <ol class="timeline">
+            <% history.forEach((row) => { %>
+              <li class="timeline-item">
+                <strong><%= f.TECHNICIAN_STATUS[row.to_status] ? f.TECHNICIAN_STATUS[row.to_status].label : row.to_status %></strong>
+                <small><%= f.formatDateTime(row.created_at) %></small>
+                <% if (row.note) { %><br /><small><%= row.note %></small><% } %>
+              </li>
+            <% }); %>
+          </ol>
+        <% } %>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

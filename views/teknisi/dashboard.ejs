@@ -1,0 +1,131 @@
+<%- include('../partials/panel-start', { panelTitle: 'Dasbor teknisi', panelSub: 'Ringkasan penugasan, pekerjaan aktif, dan pendapatan Anda.' }) %>
+
+<div class="flex-between mb-2">
+  <div>
+    <p class="eyebrow" style="margin-bottom:.4rem">Status kemitraan · disetujui</p>
+    <p class="small muted mb-0">
+      <%= profile.service_area || 'Area kerja belum diisi' %> ·
+      <%= availableToday ? 'tersedia hari ini' : 'tidak ada jadwal hari ini' %>
+    </p>
+  </div>
+  <div class="btn-row">
+    <a class="btn btn-outline btn-sm" href="/teknisi/ketersediaan">Atur ketersediaan</a>
+    <a class="btn btn-primary btn-sm" href="/teknisi/penugasan">Lihat penugasan</a>
+  </div>
+</div>
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <span class="stat-card-value"><%= stats.offers || 0 %></span>
+    <span class="stat-card-label">Penawaran menunggu</span>
+    <span class="stat-card-note">Respons cepat menaikkan peluang</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value"><%= stats.active_jobs || 0 %></span>
+    <span class="stat-card-label">Pekerjaan aktif</span>
+    <span class="stat-card-note">Sudah diterima / berjalan</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value"><%= stats.rating || '—' %></span>
+    <span class="stat-card-label">Rating (<%= stats.review_count || 0 %> ulasan)</span>
+    <span class="stat-card-note"><%= stats.completed_jobs || 0 %> pekerjaan selesai</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value" style="font-size:1.15rem"><%= f.formatRupiah(stats.month_earnings || 0) %></span>
+    <span class="stat-card-label">Pendapatan bulan ini</span>
+    <span class="stat-card-note">Total <%= f.formatRupiah(stats.total_earnings || 0) %></span>
+  </div>
+</div>
+
+<div class="split">
+  <div>
+    <section class="surface mb-2">
+      <div class="surface-head">
+        <h2>Penawaran masuk</h2>
+        <a class="text-link tiny" href="/teknisi/penugasan">Semua penugasan</a>
+      </div>
+      <div class="surface-body">
+        <% if (offers.length === 0) { %>
+          <div class="empty-state" style="border:0;background:transparent;padding:1.2rem 0">
+            <span class="glyph">✓</span>
+            <h3>Tidak ada penawaran baru</h3>
+            <p>Admin akan mengirim penawaran sesuai kompetensi dan area kerja Anda.</p>
+          </div>
+        <% } else { %>
+          <% offers.forEach((offer) => { %>
+            <div class="so-card">
+              <div class="so-top">
+                <div>
+                  <strong><%= offer.service_name %></strong>
+                  <span class="table-note"><%= offer.code %> · <%= offer.city %> · <%= f.formatDate(offer.scheduled_date) %> <%= f.formatTime(offer.scheduled_time) %></span>
+                </div>
+                <%- f.statusBadge(f.ASSIGNMENT_STATUS, 'offered') %>
+              </div>
+              <p class="tiny muted" style="margin:.5rem 0 0"><%= offer.notes || 'Tidak ada catatan tambahan.' %></p>
+              <a class="text-link mt-1" href="/teknisi/penugasan">Tinjau penawaran →</a>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head">
+        <h2>Pekerjaan aktif</h2>
+        <a class="text-link tiny" href="/teknisi/pekerjaan">Buka semua</a>
+      </div>
+      <div class="surface-body">
+        <% if (jobs.length === 0) { %>
+          <p class="small muted mb-0">Belum ada pekerjaan berjalan.</p>
+        <% } else { %>
+          <% jobs.forEach((job) => { %>
+            <a href="/teknisi/pekerjaan/<%= job.id %>" style="display:block;text-decoration:none;padding:.75rem 0;border-bottom:1px solid var(--line)">
+              <div class="flex-between">
+                <strong class="small"><%= job.service_name %></strong>
+                <%- f.statusBadge(f.SERVICE_ORDER_STATUS, job.status) %>
+              </div>
+              <span class="table-note"><%= job.code %> · <%= job.city %> · <%= f.formatDate(job.scheduled_date) %> · <%= job.work_status ? f.WORK_ORDER_STATUS[job.work_status].label : 'belum ada work order' %></span>
+            </a>
+          <% }); %>
+        <% } %>
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Pendapatan terakhir</h2></div>
+      <div class="surface-body">
+        <% if (earnings.length === 0) { %>
+          <p class="small muted mb-0">Belum ada komisi. Pendapatan tercatat setelah admin menyelesaikan pekerjaan.</p>
+        <% } else { %>
+          <% earnings.forEach((row) => { %>
+            <div style="display:flex;justify-content:space-between;gap:.7rem;padding:.5rem 0;border-bottom:1px solid var(--line)">
+              <span class="small"><%= row.service_name %><span class="table-note"><%= row.code %></span></span>
+              <strong class="small nowrap"><%= f.formatRupiah(row.technician_earning) %></strong>
+            </div>
+          <% }); %>
+          <a class="text-link mt-2" href="/teknisi/pendapatan">Rincian pendapatan →</a>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Kesiapan profil</h2></div>
+      <div class="surface-body">
+        <dl class="kv">
+          <div><dt>Kompetensi disetujui</dt><dd><%= competencyCount %></dd></div>
+          <div><dt>Ketersediaan</dt><dd><%= availableToday ? 'Ada jadwal' : 'Belum diatur' %></dd></div>
+          <div><dt>Area kerja</dt><dd><%= profile.service_area || '—' %></dd></div>
+          <div><dt>Pengalaman</dt><dd><%= profile.experience_years %> tahun</dd></div>
+        </dl>
+        <div class="btn-row mt-2">
+          <a class="btn btn-outline btn-sm" href="/teknisi/kompetensi">Kompetensi</a>
+          <a class="btn btn-ghost btn-sm" href="/teknisi/profil">Edit profil</a>
+        </div>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

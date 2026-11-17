@@ -1,0 +1,13 @@
+<% if (typeof pages !== 'undefined' && pages > 1) { %>
+  <nav class="pagination" aria-label="Navigasi halaman">
+    <% const base = typeof baseUrl !== 'undefined' ? baseUrl : currentPath; %>
+    <% const qp = typeof queryParams !== 'undefined' ? queryParams : {}; %>
+    <% const link = (p) => { const search = new URLSearchParams(); Object.entries(qp).forEach(([k, v]) => { if (v !== '' && v !== null && v !== undefined) search.set(k, v); }); search.set('page', p); return base + '?' + search.toString(); }; %>
+    <a class="page-link <%= page <= 1 ? 'disabled' : '' %>" href="<%= link(Math.max(1, page - 1)) %>" aria-label="Halaman sebelumnya">←</a>
+    <% for (let p = Math.max(1, page - 2); p <= Math.min(pages, page + 2); p++) { %>
+      <a class="page-link <%= p === page ? 'active' : '' %>" href="<%= link(p) %>" <%= p === page ? 'aria-current="page"' : '' %>><%= p %></a>
+    <% } %>
+    <a class="page-link <%= page >= pages ? 'disabled' : '' %>" href="<%= link(Math.min(pages, page + 1)) %>" aria-label="Halaman berikutnya">→</a>
+    <span class="tiny muted" style="margin-left:.4rem">Halaman <%= page %> dari <%= pages %></span>
+  </nav>
+<% } %>

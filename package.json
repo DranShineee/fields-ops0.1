@@ -1,0 +1,35 @@
+{
+  "name": "fieldsops",
+  "version": "2.0.0",
+  "private": true,
+  "description": "FieldsOps — marketplace layanan & manajemen produk (Express + MySQL)",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "build": "npm run css:build",
+    "css:build": "tailwindcss -i ./src/styles/tailwind.css -o ./public/css/app.css --minify",
+    "dev": "node --watch src/server.js",
+    "test:e2e": "node scripts/e2e.mjs",
+    "test:links": "node scripts/links.mjs",
+    "migrate": "node db/migrate.js",
+    "seed": "node db/migrate.js --seed",
+    "db:reset": "node db/migrate.js --fresh --seed"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-mysql-session": "^3.0.3",
+    "express-session": "^1.18.1",
+    "multer": "^2.0.1",
+    "mysql2": "^3.14.3"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

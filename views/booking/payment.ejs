@@ -1,0 +1,79 @@
+<%- include('../partials/head', { title: 'Pembayaran ' + booking.code, description: 'Instruksi pembayaran transfer/QRIS dan unggah bukti untuk booking FieldsOps.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap wrap-narrow">
+  <div style="padding:2rem 0 1rem">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/akun">Akun</a><span aria-hidden="true">/</span>
+      <a href="/booking/<%= booking.code %>"><%= booking.code %></a><span aria-hidden="true">/</span><span>Pembayaran</span>
+    </nav>
+    <p class="eyebrow">Pembayaran booking</p>
+    <h1 class="h2"><%= booking.payment_status === 'paid' ? 'Sudah lunas.' : 'Selesaikan pembayaran.' %></h1>
+    <p class="muted"><%= booking.code %> · <%= f.formatDateLong(booking.scheduled_date) %> · <%= booking.city %></p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="card mb-2">
+    <div class="card-head">
+      <h2>Tagihan</h2>
+      <%- f.statusBadge(f.PAYMENT_STATUS, booking.payment_status) %>
+    </div>
+    <div class="card-body">
+      <div class="flex-between">
+        <span class="muted small">Total tagihan</span>
+        <span class="price" style="font-size:1.6rem"><%= formatRupiah(booking.total) %></span>
+      </div>
+      <p class="tiny muted mt-1 mb-0">Metode: <%= f.PAYMENT_METHOD_LABELS[booking.payment_method] %><%= booking.payment_channel ? ' · ' + f.PAYMENT_CHANNEL_LABELS[booking.payment_channel] : '' %></p>
+    </div>
+  </div>
+
+  <% if (booking.payment_method === 'cod') { %>
+    <div class="notice">
+      <h3>Anda memilih COD</h3>
+      <p class="mb-0"><%= settings.cod_note %> Siapkan uang tunai sebesar <strong><%= formatRupiah(booking.total) %></strong>, atau minta teknisi mencatat pembayaran sebelum meninggalkan lokasi.</p>
+    </div>
+  <% } else if (booking.payment_status === 'paid') { %>
+    <div class="flash flash-success"><div><span class="flash-label">Lunas</span>Pembayaran sudah diverifikasi admin. Tidak ada yang perlu dilakukan.</div></div>
+  <% } else if (booking.payment_status === 'pending_verification') { %>
+    <div class="notice">
+      <h3>Bukti sedang diperiksa</h3>
+      <p class="mb-0">Admin memverifikasi bukti dalam 1×24 jam kerja. Jika bukti kurang jelas, Anda akan diminta mengunggah ulang lewat notifikasi.</p>
+    </div>
+  <% } else { %>
+    <div class="split-even mb-2">
+      <div class="card card-pad">
+        <h2 class="h3" style="font-size:1rem">Transfer bank</h2>
+        <dl class="kv" style="margin-top:.7rem">
+          <div><dt>Bank</dt><dd>BCA (contoh)</dd></div>
+          <div><dt>Nomor</dt><dd class="mono">1234567890</dd></div>
+          <div><dt>Atas nama</dt><dd>PT FieldsOps Nusantara</dd></div>
+          <div><dt>Nominal</dt><dd><strong><%= formatRupiah(booking.total) %></strong></dd></div>
+        </dl>
+        <p class="tiny muted mt-2 mb-0">Cantumkan kode <span class="mono"><%= booking.code %></span> pada berita transfer agar mudah dicocokkan.</p>
+      </div>
+      <div class="card card-pad">
+        <h2 class="h3" style="font-size:1rem">QRIS</h2>
+        <img src="/img/qris.svg" alt="Contoh kode QRIS pembayaran" style="width:100%;max-width:220px;border:1px solid var(--line);border-radius:6px;margin-top:.7rem;background:#fff;padding:.6rem" />
+        <p class="tiny muted mt-1 mb-0">Pindai dengan aplikasi bank/e-wallet, lalu simpan bukti transaksi.</p>
+      </div>
+    </div>
+
+    <form method="post" action="/booking/<%= booking.code %>/bayar" enctype="multipart/form-data" class="card card-pad">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <h2 class="h3" style="font-size:1rem">Unggah bukti pembayaran</h2>
+      <p class="small muted">JPG, PNG, atau PDF maksimal 3 MB. Pastikan nominal dan tanggal terlihat.</p>
+      <div class="dropzone">
+        <label for="proof">Berkas bukti</label>
+        <input type="file" id="proof" name="proof" accept="image/jpeg,image/png,image/webp,application/pdf" required data-file-input="proof" />
+        <p class="tiny muted mt-1 mb-0" data-file-name="proof">Belum ada berkas dipilih</p>
+      </div>
+      <button class="btn btn-primary mt-2" type="submit">Kirim bukti</button>
+      <p class="tiny muted mt-1 mb-0">Setelah dikirim, status berubah menjadi menunggu verifikasi admin.</p>
+    </form>
+  <% } %>
+
+  <p class="small mt-2"><a class="link" href="/booking/<%= booking.code %>">← Kembali ke detail booking</a></p>
+</main>
+
+<%- include('../partials/site-footer') %>

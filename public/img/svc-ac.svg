@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Servis AC">
+  <defs>
+    <linearGradient id="acbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f3350"/>
+      <stop offset="0.55" stop-color="#2a4a6e"/>
+      <stop offset="1" stop-color="#16283c"/>
+    </linearGradient>
+    <linearGradient id="acglow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cc4ff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7cc4ff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#acbg)"/>
+  <circle cx="512" cy="96" r="120" fill="url(#acglow)"/>
+  <g stroke="#bfe3ff" stroke-opacity="0.35" fill="none" stroke-width="2">
+    <rect x="120" y="120" width="300" height="120" rx="18"/>
+    <path d="M140 176h260M140 204h200"/>
+    <path d="M170 300c22-20 44-20 66 0s44 20 66 0 44-20 66 0"/>
+    <path d="M170 330c22-20 44-20 66 0s44 20 66 0 44-20 66 0" opacity="0.6"/>
+  </g>
+  <g fill="#ffb066">
+    <circle cx="452" cy="150" r="7"/>
+    <rect x="430" y="186" width="44" height="6" rx="3" opacity="0.8"/>
+    <rect x="410" y="204" width="64" height="6" rx="3" opacity="0.6"/>
+  </g>
+</svg>

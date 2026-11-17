@@ -1,0 +1,68 @@
+<%- include('../partials/panel-start', { panelTitle: 'Pendapatan', panelSub: 'Komisi platform dipotong sekali per pekerjaan selesai. Tidak ada potongan retroaktif.' }) %>
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <span class="stat-card-value" style="font-size:1.2rem"><%= f.formatRupiah(summary.total || 0) %></span>
+    <span class="stat-card-label">Total pendapatan bersih</span>
+    <span class="stat-card-note"><%= summary.jobs || 0 %> pekerjaan selesai</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value" style="font-size:1.2rem"><%= f.formatRupiah(summary.this_month || 0) %></span>
+    <span class="stat-card-label">Bulan ini</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value" style="font-size:1.2rem"><%= f.formatRupiah(summary.fees || 0) %></span>
+    <span class="stat-card-label">Komisi platform</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value"><%= summary.jobs || 0 %></span>
+    <span class="stat-card-label">Pekerjaan terbayar</span>
+  </div>
+</div>
+
+<div class="split">
+  <section class="surface">
+    <div class="surface-head"><h2>Rincian komisi</h2></div>
+    <div class="surface-body">
+      <% if (rows.length === 0) { %>
+        <p class="small muted mb-0">Belum ada komisi. Pendapatan muncul setelah admin menyelesaikan work order.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Layanan</th><th>Booking</th><th>Nilai</th><th>Komisi</th><th>Diterima</th></tr></thead>
+            <tbody>
+              <% rows.forEach((row) => { %>
+                <tr>
+                  <td><%= row.service_name %></td>
+                  <td class="mono"><%= row.code %></td>
+                  <td><%= f.formatRupiah(row.gross_amount) %></td>
+                  <td class="small muted"><%= row.percent %>% · <%= f.formatRupiah(row.platform_fee) %></td>
+                  <td><strong><%= f.formatRupiah(row.technician_earning) %></strong></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <aside class="surface">
+    <div class="surface-head"><h2>Per bulan</h2></div>
+    <div class="surface-body">
+      <% if (monthly.length === 0) { %>
+        <p class="small muted mb-0">Belum ada data bulanan.</p>
+      <% } else { %>
+        <% monthly.forEach((row) => { %>
+          <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--line)">
+            <span class="small"><%= row.period %><span class="table-note"><%= row.jobs %> pekerjaan</span></span>
+            <strong class="small"><%= f.formatRupiah(row.amount) %></strong>
+          </div>
+        <% }); %>
+      <% } %>
+      <p class="tiny muted mt-2 mb-0">Pembayaran ke rekening diproses admin di luar aplikasi. Gunakan halaman ini sebagai catatan.</p>
+    </div>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

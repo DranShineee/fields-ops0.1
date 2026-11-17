@@ -1,0 +1,72 @@
+<%- include('../partials/head', { title: 'Konfirmasi booking', description: 'Periksa rincian layanan, jadwal, alamat, dan metode pembayaran sebelum booking dikirim.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap wrap-narrow">
+  <div style="padding:2rem 0 1rem">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Beranda</a><span aria-hidden="true">/</span><a href="/layanan">Layanan</a><span aria-hidden="true">/</span><span>Konfirmasi</span>
+    </nav>
+    <p class="eyebrow">Langkah 2 dari 2</p>
+    <h1 class="h2">Periksa dulu. Setelah ini masuk antrean admin.</h1>
+    <p class="lede">Tidak ada pembayaran yang ditagih sekarang. Untuk transfer/QRIS, instruksi muncul setelah booking dibuat.</p>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="card-head">
+      <h2>Rincian layanan</h2>
+      <span class="chip"><%= services.length %> layanan</span>
+    </div>
+    <% services.forEach((item) => { %>
+      <div style="display:flex;justify-content:space-between;gap:1rem;padding:.85rem 1.3rem;border-bottom:1px solid var(--line)">
+        <div>
+          <strong><%= item.name %></strong>
+          <span class="table-note"><%= item.category_name %> · ±<%= item.duration_minutes %> menit · <%= item.price_type === 'estimate' ? 'estimasi awal' : 'harga tetap' %></span>
+        </div>
+        <div class="price" style="white-space:nowrap"><%= formatRupiah(item.price) %></div>
+      </div>
+    <% }); %>
+    <div style="display:flex;justify-content:space-between;padding:1rem 1.3rem">
+      <strong>Total</strong>
+      <strong class="price"><%= formatRupiah(total) %></strong>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="card-head"><h2>Jadwal &amp; lokasi</h2></div>
+    <div class="card-body">
+      <dl class="kv">
+        <div><dt>Tanggal</dt><dd><%= f.formatDateLong(data.date) %></dd></div>
+        <div><dt>Jam</dt><dd><%= data.time %> WIB</dd></div>
+        <div><dt>Alamat</dt><dd><%= data.address %><br /><%= data.city %><%= data.postalCode ? ' ' + data.postalCode : '' %></dd></div>
+        <div><dt>Catatan</dt><dd><%= data.notes || '—' %></dd></div>
+        <div><dt>Pembayaran</dt><dd><%= f.PAYMENT_METHOD_LABELS[data.method] %><%= data.method === 'full' ? ' · ' + f.PAYMENT_CHANNEL_LABELS[data.channel] : '' %></dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <form method="post" action="/booking" class="card card-pad">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <input type="hidden" name="service_id" value="<%= services[0].id %>" />
+    <% services.slice(1).forEach((item) => { %>
+      <input type="hidden" name="extra" value="<%= item.id %>" />
+    <% }); %>
+    <input type="hidden" name="scheduled_date" value="<%= data.date %>" />
+    <input type="hidden" name="scheduled_time" value="<%= data.time %>" />
+    <input type="hidden" name="address" value="<%= data.address %>" />
+    <input type="hidden" name="city" value="<%= data.city %>" />
+    <input type="hidden" name="postal_code" value="<%= data.postalCode %>" />
+    <input type="hidden" name="notes" value="<%= data.notes %>" />
+    <input type="hidden" name="payment_method" value="<%= data.method %>" />
+    <input type="hidden" name="payment_channel" value="<%= data.channel || '' %>" />
+
+    <div class="btn-row">
+      <button class="btn btn-primary" type="submit">Kirim booking</button>
+      <a class="btn btn-ghost" href="/layanan/<%= services[0].slug %>">Ubah rincian</a>
+    </div>
+    <p class="tiny muted mt-2 mb-0">Dengan mengirim, Anda setuju admin menugaskan teknisi sesuai kompetensi. Pembatalan bisa dilakukan selama pekerjaan belum dimulai.</p>
+  </form>
+</main>
+
+<%- include('../partials/site-footer') %>

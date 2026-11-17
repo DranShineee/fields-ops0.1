@@ -1,0 +1,157 @@
+<%- include('../partials/head', { title: 'Buat akun', description: 'Daftar sebagai customer untuk memesan jasa, atau sebagai teknisi untuk mengajukan kemitraan FieldsOps.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div class="auth-page">
+    <section class="auth-card" style="justify-content:flex-start">
+      <%- include('../partials/flash') %>
+      <p class="eyebrow auth-enter">Buat akun</p>
+      <h1 class="h3 auth-enter" style="font-size:1.7rem;margin-bottom:.35rem">Mulai dari peran yang tepat.</h1>
+      <p class="small muted auth-enter" style="margin-bottom:1.2rem">
+        Customer memesan layanan. Teknisi mengajukan kemitraan dengan data keahlian dan harus lolos verifikasi admin.
+      </p>
+
+      <form method="post" action="/register" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+        <fieldset class="field" style="border:0;padding:0">
+          <legend class="field-label">Saya mendaftar sebagai</legend>
+          <div class="grid-2">
+            <label class="choice">
+              <input type="radio" name="role" value="customer" <%= form.role !== 'technician' ? 'checked' : '' %> />
+              <span><strong>Customer</strong><small>Pesan layanan untuk rumah atau usaha.</small></span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="role" value="technician" <%= form.role === 'technician' ? 'checked' : '' %> />
+              <span><strong>Teknisi</strong><small>Ajukan kemitraan, terima penugasan.</small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="form-section">
+          <p class="form-section-label">Data akun</p>
+          <div class="field-row">
+            <div class="field">
+              <label for="name">Nama lengkap</label>
+              <input class="input <%= errors.name ? 'has-error' : '' %>" type="text" id="name" name="name" value="<%= form.name || '' %>" autocomplete="name" required />
+              <% if (errors.name) { %><p class="error-text"><%= errors.name %></p><% } %>
+            </div>
+            <div class="field">
+              <label for="phone">Nomor WhatsApp</label>
+              <input class="input <%= errors.phone ? 'has-error' : '' %>" type="tel" id="phone" name="phone" value="<%= form.phone || '' %>" placeholder="0812xxxxxxx" autocomplete="tel" required />
+              <% if (errors.phone) { %><p class="error-text"><%= errors.phone %></p><% } %>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input class="input <%= errors.email ? 'has-error' : '' %>" type="email" id="email" name="email" value="<%= form.email || '' %>" autocomplete="email" required />
+            <% if (errors.email) { %><p class="error-text"><%= errors.email %></p><% } %>
+          </div>
+        </div>
+
+        <fieldset class="tech-fields" data-tech-fields <%= form.role === 'technician' ? '' : 'hidden' %>>
+          <p class="tech-head">Data kemitraan teknisi</p>
+
+          <div class="field">
+            <label for="bio">Pengalaman &amp; keahlian</label>
+            <textarea class="textarea <%= errors.bio ? 'has-error' : '' %>" id="bio" name="bio" rows="3" placeholder="Contoh: 6 tahun servis AC split dan cassette, biasa menangani bocor freon dan kelistrikan."><%= form.bio || '' %></textarea>
+            <% if (errors.bio) { %><p class="error-text"><%= errors.bio %></p><% } else { %><p class="help">Tulis minimal 30 karakter agar admin mudah menilai keahlian Anda.</p><% } %>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="experience_years">Pengalaman (tahun)</label>
+              <input class="input <%= errors.experience ? 'has-error' : '' %>" type="number" id="experience_years" name="experience_years" min="1" max="60" value="<%= form.experience_years || '' %>" />
+              <% if (errors.experience) { %><p class="error-text"><%= errors.experience %></p><% } %>
+            </div>
+            <div class="field">
+              <label for="ktp_number">Nomor KTP (16 angka)</label>
+              <input class="input <%= errors.ktp ? 'has-error' : '' %>" type="text" id="ktp_number" name="ktp_number" inputmode="numeric" maxlength="16" value="<%= form.ktp_number || '' %>" />
+              <% if (errors.ktp) { %><p class="error-text"><%= errors.ktp %></p><% } %>
+              <p class="help">Hanya admin berwenang yang dapat membuka data identitas.</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="service_area">Area kerja</label>
+            <input class="input <%= errors.area ? 'has-error' : '' %>" type="text" id="service_area" name="service_area" value="<%= form.service_area || '' %>" placeholder="mis. Jakarta Selatan, Depok, Bekasi" />
+            <% if (errors.area) { %><p class="error-text"><%= errors.area %></p><% } %>
+          </div>
+
+          <div class="field">
+            <label>Kategori keahlian yang diajukan</label>
+            <div class="tech-cats">
+              <% (categories || []).forEach((cat) => { %>
+                <label class="check">
+                  <input type="checkbox" name="category_ids" value="<%= cat.id %>" <%= (form.category_ids || []).map(String).includes(String(cat.id)) ? 'checked' : '' %> />
+                  <span class="small"><%= cat.name %></span>
+                </label>
+              <% }); %>
+            </div>
+            <% if (errors.categories) { %><p class="error-text"><%= errors.categories %></p><% } else { %><p class="help">Pilih minimal satu. Kompetensi akan diverifikasi admin sebelum aktif.</p><% } %>
+          </div>
+        </fieldset>
+
+        <div class="form-section">
+          <p class="form-section-label">Keamanan akun</p>
+          <div class="field-row">
+            <div class="field">
+              <label for="password">Kata sandi</label>
+              <div class="pw-wrap">
+                <input class="input <%= errors.password ? 'has-error' : '' %>" type="password" id="password" name="password" autocomplete="new-password" minlength="8" required />
+                <button type="button" class="pw-toggle" data-pw-toggle="password" aria-label="Tampilkan kata sandi">Lihat</button>
+              </div>
+              <% if (errors.password) { %><p class="error-text"><%= errors.password %></p><% } else { %><p class="help">Minimal 8 karakter, gabungkan huruf dan angka.</p><% } %>
+            </div>
+            <div class="field">
+              <label for="confirm_password">Ulangi kata sandi</label>
+              <div class="pw-wrap">
+                <input class="input <%= errors.confirm_password ? 'has-error' : '' %>" type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required />
+                <button type="button" class="pw-toggle" data-pw-toggle="confirm_password" aria-label="Tampilkan kata sandi">Lihat</button>
+              </div>
+              <% if (errors.confirm_password) { %><p class="error-text"><%= errors.confirm_password %></p><% } %>
+            </div>
+          </div>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" required />
+          <span class="small">Saya setuju data dipakai untuk pelaksanaan pekerjaan dan dibagikan hanya kepada pihak yang ditugaskan.</span>
+        </label>
+
+        <button class="btn btn-primary btn-block mt-2" type="submit" data-submit-label>
+          <%= form.role === 'technician' ? 'Kirim pengajuan teknisi' : 'Buat akun customer' %>
+        </button>
+        <p class="tiny muted mt-2 mb-0" style="text-align:center">Sudah punya akun? <a class="link" href="/login">Masuk di sini</a></p>
+      </form>
+    </section>
+
+    <aside class="auth-visual">
+      <span class="auth-orb one" aria-hidden="true"></span>
+      <span class="auth-orb two" aria-hidden="true"></span>
+      <div>
+        <p class="eyebrow auth-enter">Dua jalur, satu standar</p>
+        <h2 class="auth-enter" style="color:#fff;font-size:clamp(1.6rem,2.6vw,2.2rem)">
+          Bergabung sebagai <span style="color:#ffb066">customer</span> atau <span style="color:#ffb066">mitra teknisi</span>.
+        </h2>
+        <p class="lede auth-enter">
+          Customer cukup mengisi data dasar. Calon teknisi menambahkan pengalaman, area kerja,
+          nomor KTP, dan kategori keahlian untuk diverifikasi admin.
+        </p>
+        <div class="auth-chips auth-enter">
+          <span class="auth-chip">Verifikasi berlapis</span>
+          <span class="auth-chip">Kompetensi per kategori</span>
+          <span class="auth-chip">Penugasan jelas</span>
+        </div>
+      </div>
+      <div class="auth-foot">
+        <p class="mb-0" data-role-hint="customer">Customer: pesan layanan, pantau work order, dan bayar setelah selesai.</p>
+        <p class="mb-0" data-role-hint="technician" hidden>Teknisi: ajukan kemitraan, lengkapi data keahlian, lalu tunggu verifikasi admin.</p>
+        <span class="mono" style="letter-spacing:.12em">FIELDSOPS · <%= currentYear %></span>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/site-footer') %>

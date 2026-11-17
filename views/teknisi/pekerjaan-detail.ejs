@@ -1,0 +1,147 @@
+<%- include('../partials/panel-start', { panelTitle: job.service_name, panelSub: job.code + ' · ' + job.city }) %>
+
+<div class="flex-between mb-2">
+  <div class="flex-wrap">
+    <%- f.statusBadge(f.SERVICE_ORDER_STATUS, job.status) %>
+    <% if (work) { %><%- f.statusBadge(f.WORK_ORDER_STATUS, work.status) %><% } %>
+    <span class="chip"><%= f.formatDateLong(job.scheduled_date) %> · <%= f.formatTime(job.scheduled_time) %></span>
+  </div>
+  <a class="text-link" href="/teknisi/pekerjaan">← Semua pekerjaan</a>
+</div>
+
+<div class="split">
+  <div>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Detail pekerjaan</h2><span class="chip"><%= job.category_name %></span></div>
+      <div class="surface-body">
+        <dl class="kv">
+          <div><dt>Customer</dt><dd><%= job.customer_name %></dd></div>
+          <div><dt>Kontak</dt><dd>
+            <% if (job.customer_phone) { %>
+              <a class="link" href="<%= f.waLink(job.customer_phone, 'Halo, saya ' + currentUser.name + ' teknisi FieldsOps untuk ' + job.code) %>" target="_blank" rel="noopener"><%= f.formatPhone(job.customer_phone) %></a>
+            <% } else { %>—<% } %>
+          </dd></div>
+          <div><dt>Alamat</dt><dd><%= job.address %><br /><%= job.city %><%= job.postal_code ? ' ' + job.postal_code : '' %></dd></div>
+          <div><dt>Catatan customer</dt><dd><%= job.notes || '—' %></dd></div>
+          <div><dt>Nilai layanan</dt><dd><%= f.formatRupiah(job.price) %> · <%= job.price_type === 'estimate' ? 'estimasi' : 'tetap' %></dd></div>
+          <div><dt>Pembayaran</dt><dd><%= f.PAYMENT_METHOD_LABELS[job.payment_method] %> · <%- f.statusBadge(f.PAYMENT_STATUS, job.payment_status) %></dd></div>
+        </dl>
+
+        <div class="notice" style="margin-top:1rem">
+          <h3>Instruksi admin</h3>
+          <p class="mb-0"><%= work && work.instructions ? work.instructions : 'Kerjakan sesuai cakupan layanan. Laporkan bila ada temuan di luar cakupan.' %></p>
+        </div>
+        <% if (work && work.findings) { %>
+          <p class="small"><strong>Temuan tercatat:</strong> <%= work.findings %></p>
+        <% } %>
+        <% if (work && work.evidence_url) { %>
+          <p class="small"><a class="link" href="<%= work.evidence_url %>" target="_blank" rel="noopener">Buka bukti pekerjaan terakhir</a></p>
+        <% } %>
+      </div>
+    </section>
+
+    <% if (canEdit) { %>
+      <section class="surface mb-2">
+        <div class="surface-head"><h2>Perbarui status</h2></div>
+        <div class="surface-body">
+          <div class="btn-row mb-2">
+            <% if (!work || work.status === 'assigned') { %>
+              <form method="post" action="/teknisi/pekerjaan/<%= job.id %>/status">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <input type="hidden" name="action" value="terima" />
+                <button class="btn btn-outline btn-sm" type="submit">Terima work order</button>
+              </form>
+            <% } %>
+            <% if (work && ['assigned','accepted','in_progress'].includes(work.status)) { %>
+              <form method="post" action="/teknisi/pekerjaan/<%= job.id %>/status">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <input type="hidden" name="action" value="mulai" />
+                <button class="btn btn-primary btn-sm" type="submit">Mulai bekerja</button>
+              </form>
+            <% } %>
+          </div>
+
+          <details class="mb-2">
+            <summary style="cursor:pointer;font-size:.88rem;font-weight:600">Laporkan hambatan</summary>
+            <form method="post" action="/teknisi/pekerjaan/<%= job.id %>/status" style="margin-top:.6rem">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="hidden" name="action" value="terhambat" />
+              <div class="field">
+                <label for="note">Apa yang menghambat?</label>
+                <textarea class="textarea" id="note" name="note" rows="2" minlength="10" required style="min-height:64px" placeholder="mis. kompresor mati, perlu part baru"></textarea>
+              </div>
+              <button class="btn btn-danger btn-sm" type="submit">Kirim ke admin</button>
+            </form>
+          </details>
+
+          <form method="post" action="/teknisi/pekerjaan/<%= job.id %>/status">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <input type="hidden" name="action" value="ajukan" />
+            <div class="field">
+              <label for="findings">Temuan (opsional)</label>
+              <textarea class="textarea" id="findings" name="findings" rows="2" style="min-height:60px" maxlength="600"><%= work ? work.findings || '' : '' %></textarea>
+            </div>
+            <div class="field">
+              <label for="actions_taken">Tindakan yang sudah dilakukan</label>
+              <textarea class="textarea" id="actions_taken" name="actions_taken" rows="3" required minlength="10" maxlength="600"><%= work ? work.actions_taken || '' : '' %></textarea>
+              <p class="help">Admin memakai catatan ini untuk menyelesaikan work order dan menghitung komisi.</p>
+            </div>
+            <button class="btn btn-clay" type="submit">Ajukan hasil ke admin</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="surface">
+        <div class="surface-head"><h2>Unggah bukti pekerjaan</h2></div>
+        <div class="surface-body">
+          <form method="post" action="/teknisi/pekerjaan/<%= job.id %>/bukti" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="dropzone">
+              <label for="evidence">Foto sebelum/sesudah atau dokumen servis</label>
+              <input type="file" id="evidence" name="evidence" accept="image/jpeg,image/png,image/webp,application/pdf" required data-file-input="evidence" />
+              <p class="tiny muted mt-1 mb-0" data-file-name="evidence">Belum ada berkas dipilih</p>
+            </div>
+            <button class="btn btn-outline mt-2" type="submit">Unggah bukti</button>
+          </form>
+        </div>
+      </section>
+    <% } else { %>
+      <div class="notice">Pekerjaan ini sudah selesai atau dibatalkan. Tidak ada aksi yang tersedia.</div>
+    <% } %>
+  </div>
+
+  <aside>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Riwayat pekerjaan</h2></div>
+      <div class="surface-body">
+        <% if (history.length === 0) { %>
+          <p class="small muted mb-0">Belum ada riwayat.</p>
+        <% } else { %>
+          <ol class="timeline">
+            <% history.forEach((row) => { %>
+              <li class="timeline-item">
+                <strong><%= row.to_status.replace(/_/g, ' ') %></strong>
+                <small><%= f.formatDateTime(row.created_at) %> · <%= row.actor_name || 'sistem' %></small>
+                <% if (row.note) { %><br /><small><%= row.note %></small><% } %>
+              </li>
+            <% }); %>
+          </ol>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Pengingat</h2></div>
+      <div class="surface-body">
+        <ul class="spec-list">
+          <li>Konfirmasi kedatangan ke customer lewat WhatsApp.</li>
+          <li>Jangan meminta pembayaran di luar metode booking (transfer/QRIS/COD).</li>
+          <li>Foto bukti kerja sebelum meninggalkan lokasi.</li>
+          <li>Ajukan hasil setelah pekerjaan benar-benar selesai.</li>
+        </ul>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

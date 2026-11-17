@@ -1,0 +1,73 @@
+<%- include('../partials/panel-start', { panelTitle: 'Transaksi', panelSub: 'Verifikasi bukti pembayaran. Nominal harus sama dengan total booking.' }) %>
+
+<div class="stat-cards">
+  <div class="stat-card"><span class="stat-card-value" style="font-size:1.2rem"><%= formatRupiah(summary.paid || 0) %></span><span class="stat-card-label">Lunas</span></div>
+  <div class="stat-card"><span class="stat-card-value" style="font-size:1.2rem"><%= formatRupiah(summary.pending || 0) %></span><span class="stat-card-label">Menunggu verifikasi</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= summary.total || 0 %></span><span class="stat-card-label">Total transaksi</span></div>
+  <div class="stat-card"><span class="stat-card-value">15%</span><span class="stat-card-label">Komisi aktif</span></div>
+</div>
+
+<form class="filter-bar" method="get" action="/admin/transaksi">
+  <div class="field">
+    <label for="status">Status</label>
+    <select class="select" id="status" name="status">
+      <option value="">Semua</option>
+      <% ['pending_verification','unpaid','paid','failed','refunded'].forEach((status) => { %>
+        <option value="<%= status %>" <%= filters.status === status ? 'selected' : '' %>><%= f.PAYMENT_STATUS[status].label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/transaksi">Reset</a>
+</form>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Referensi</th><th>Booking</th><th>Nominal</th><th>Metode</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead>
+    <tbody>
+      <% transactions.forEach((tx) => { %>
+        <tr>
+          <td class="mono"><%= tx.reference %><span class="table-note"><%= f.formatDateTime(tx.created_at) %></span></td>
+          <td class="mono"><a class="link" href="/admin/booking/<%= tx.code %>"><%= tx.code %></a><span class="table-note"><%= tx.customer_name %></span></td>
+          <td><%= formatRupiah(tx.amount) %></td>
+          <td class="small"><%= f.PAYMENT_METHOD_LABELS[tx.method] %><% if (tx.channel) { %><span class="table-note"><%= f.PAYMENT_CHANNEL_LABELS[tx.channel] %></span><% } %></td>
+          <td><%- f.statusBadge(f.PAYMENT_STATUS, tx.status) %></td>
+          <td class="small"><% if (tx.proof_url) { %><a class="link" href="<%= tx.proof_url %>" target="_blank" rel="noopener">Lihat</a><% } else { %><span class="muted">—</span><% } %></td>
+          <td>
+            <div class="table-actions">
+              <% if (tx.status === 'pending_verification' || tx.status === 'unpaid') { %>
+                <form method="post" action="/admin/transaksi/<%= tx.id %>">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <input type="hidden" name="action" value="verifikasi" />
+                  <button class="btn btn-primary btn-sm" type="submit">Verifikasi</button>
+                </form>
+              <% } %>
+              <% if (tx.status === 'pending_verification') { %>
+                <form method="post" action="/admin/transaksi/<%= tx.id %>" data-confirm="Tolak bukti pembayaran <%= tx.reference %>?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <input type="hidden" name="action" value="tolak" />
+                  <button class="btn btn-ghost btn-sm" type="submit">Tolak</button>
+                </form>
+              <% } %>
+              <% if (tx.status === 'paid') { %>
+                <details>
+                  <summary style="cursor:pointer;font-size:.78rem" class="muted">Refund</summary>
+                  <form method="post" action="/admin/transaksi/<%= tx.id %>" style="margin-top:.4rem" data-confirm="Catat refund untuk <%= tx.reference %>?">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="action" value="refund" />
+                    <input class="input" style="min-width:150px" type="text" name="reason" minlength="5" placeholder="Alasan refund" required />
+                    <button class="btn btn-danger btn-sm mt-1" type="submit">Proses</button>
+                  </form>
+                </details>
+              <% } %>
+            </div>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/transaksi', queryParams: { status: filters.status }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

@@ -1,0 +1,100 @@
+<%- include('../partials/panel-start', { panelTitle: title, panelSub: 'Perubahan harga berlaku untuk booking baru. Booking lama memakai harga saat dipesan.' }) %>
+
+<form method="post" action="/admin/layanan" class="split">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+  <input type="hidden" name="id" value="<%= service.id || '' %>" />
+
+  <div>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Informasi layanan</h2></div>
+      <div class="surface-body">
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Nama layanan</label>
+            <input class="input <%= errors.name ? 'has-error' : '' %>" type="text" id="name" name="name" value="<%= service.name || '' %>" required />
+            <% if (errors.name) { %><p class="error-text"><%= errors.name %></p><% } %>
+          </div>
+          <div class="field">
+            <label for="category_id">Kategori</label>
+            <select class="select <%= errors.category_id ? 'has-error' : '' %>" id="category_id" name="category_id" required>
+              <option value="">Pilih kategori</option>
+              <% categories.forEach((cat) => { %>
+                <option value="<%= cat.id %>" <%= Number(service.category_id) === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+              <% }); %>
+            </select>
+            <% if (errors.category_id) { %><p class="error-text"><%= errors.category_id %></p><% } %>
+          </div>
+        </div>
+        <div class="field">
+          <label for="description">Deskripsi</label>
+          <textarea class="textarea" id="description" name="description" rows="3"><%= service.description || '' %></textarea>
+          <p class="help">Tulis keluhan nyata yang diselesaikan, bukan slogan.</p>
+        </div>
+        <div class="field">
+          <label for="scope">Cakupan pekerjaan</label>
+          <textarea class="textarea" id="scope" name="scope" rows="3"><%= service.scope || '' %></textarea>
+        </div>
+        <div class="field">
+          <label for="requirements">Yang perlu disiapkan customer</label>
+          <textarea class="textarea" id="requirements" name="requirements" rows="2"><%= service.requirements || '' %></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Harga &amp; pelaksanaan</h2></div>
+      <div class="surface-body">
+        <div class="field-row-3">
+          <div class="field">
+            <label for="price_type">Tipe harga</label>
+            <select class="select" id="price_type" name="price_type">
+              <option value="fixed" <%= service.price_type === 'fixed' ? 'selected' : '' %>>Harga tetap</option>
+              <option value="estimate" <%= service.price_type === 'estimate' ? 'selected' : '' %>>Estimasi awal</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="price">Harga (Rp)</label>
+            <input class="input <%= errors.price ? 'has-error' : '' %>" type="number" id="price" name="price" min="0" step="1000" value="<%= service.price || 0 %>" required />
+            <% if (errors.price) { %><p class="error-text"><%= errors.price %></p><% } %>
+          </div>
+          <div class="field">
+            <label for="duration_minutes">Durasi (menit)</label>
+            <input class="input <%= errors.duration_minutes ? 'has-error' : '' %>" type="number" id="duration_minutes" name="duration_minutes" min="15" value="<%= service.duration_minutes || 90 %>" required />
+            <% if (errors.duration_minutes) { %><p class="error-text"><%= errors.duration_minutes %></p><% } %>
+          </div>
+        </div>
+        <div class="field">
+          <label for="service_area">Area layanan</label>
+          <input class="input" type="text" id="service_area" name="service_area" value="<%= service.service_area || '' %>" placeholder="mis. Jakarta, Bandung" />
+        </div>
+        <div class="field">
+          <label for="image_url">Ilustrasi</label>
+          <select class="select" id="image_url" name="image_url">
+            <% ['/img/svc-ac.svg','/img/svc-motor.svg','/img/svc-komputer.svg','/img/svc-sepeda.svg','/img/placeholder.svg'].forEach((url) => { %>
+              <option value="<%= url %>" <%= service.image_url === url ? 'selected' : '' %>><%= url %></option>
+            <% }); %>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" name="is_active" <%= service.is_active ? 'checked' : '' %> /> <span>Tayangkan di katalog</span></label>
+        <label class="check"><input type="checkbox" name="is_featured" <%= service.is_featured ? 'checked' : '' %> /> <span>Tandai sebagai layanan unggulan</span></label>
+        <div class="btn-row mt-2">
+          <button class="btn btn-primary" type="submit">Simpan layanan</button>
+          <a class="btn btn-ghost" href="/admin/layanan">Batal</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <div class="surface card-pad">
+      <h2 class="h3" style="font-size:.95rem">Catatan</h2>
+      <ul class="spec-list">
+        <li>Booking menyimpan snapshot nama &amp; harga layanan, jadi perubahan tidak mengubah tagihan lama.</li>
+        <li>Kompetensi teknisi terhubung ke kategori, bukan ke layanan.</li>
+        <li>Menonaktifkan layanan menyembunyikannya dari katalog tanpa menghapus riwayat.</li>
+      </ul>
+    </div>
+  </aside>
+</form>
+
+<%- include('../partials/panel-end') %>

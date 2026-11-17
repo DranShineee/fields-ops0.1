@@ -1,0 +1,42 @@
+<%- include('partials/head', { title: 'Kategori layanan', description: 'Empat kategori utama FieldsOps: AC, sepeda motor, komputer, dan sepeda. Masing-masing punya cakupan dan teknisi bersertifikat kompetensi.' }) %>
+<%- include('partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div class="page-head">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Beranda</a><span aria-hidden="true">/</span><span>Kategori</span>
+      </nav>
+      <h1>Empat kategori. Bukan semuanya untuk semua orang.</h1>
+      <p>Setiap teknisi punya kompetensi per kategori yang harus disetujui admin. Jadi tukang AC tidak menerima pekerjaan laptop — dan sebaliknya.</p>
+    </div>
+  </div>
+
+  <div class="service-grid">
+    <% categories.forEach((cat, index) => { %>
+      <a class="service-card reveal" href="/layanan?kategori=<%= cat.slug %>">
+        <div class="service-media" style="display:grid;place-items:center;background:var(--sand);color:var(--moss)">
+          <%- include('partials/category-icon', { name: cat.icon }) %>
+          <span class="cat-tag">0<%= index + 1 %></span>
+        </div>
+        <div class="service-body">
+          <h3><%= cat.name %></h3>
+          <p><%= cat.description %></p>
+          <div class="service-foot">
+            <span class="price"><%= cat.service_count %> layanan <small>dari <%= formatRupiah(cat.min_price || 0) %></small></span>
+            <span class="tiny muted">Buka →</span>
+          </div>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+
+  <section class="section-tight">
+    <div class="notice">
+      <h3>Tidak menemukan kategori yang Anda butuhkan?</h3>
+      <p class="mb-0">Kategori MVP sengaja dibatasi agar kualitas verifikasi teknisi tetap terjaga. Kirim usulan lewat <a class="link" href="/keluhan">halaman bantuan</a> setelah masuk sebagai customer.</p>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/site-footer') %>

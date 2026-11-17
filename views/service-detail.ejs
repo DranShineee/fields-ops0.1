@@ -1,0 +1,220 @@
+<%- include('partials/head', { title: service.name, description: service.description }) %>
+<%- include('partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div style="padding-top:1.6rem">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Beranda</a><span aria-hidden="true">/</span>
+      <a href="/layanan?kategori=<%= service.category_slug %>"><%= service.category_name %></a><span aria-hidden="true">/</span>
+      <span><%= service.name %></span>
+    </nav>
+  </div>
+
+  <div class="detail-grid" style="padding-bottom:2rem">
+    <div>
+      <div style="border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--sand);margin-bottom:1.4rem">
+        <img src="<%= service.image_url %>" alt="Ilustrasi <%= service.category_name %>" style="width:100%;aspect-ratio:21/9;object-fit:cover" />
+      </div>
+
+      <p class="eyebrow"><%= service.category_name %> · ±<%= service.duration_minutes %> menit</p>
+      <h1 class="h2" style="max-width:22ch"><%= service.name %></h1>
+      <div class="flex-wrap mb-2">
+        <%- f.stars(service.rating) %>
+        <span class="tiny muted"><%= ratings.total || 0 %> ulasan</span>
+        <span class="tiny muted">·</span>
+        <span class="tiny muted"><%= techCount %> teknisi siap untuk kategori ini</span>
+      </div>
+      <p class="lede"><%= service.description %></p>
+
+      <div class="split-even" style="margin:1.6rem 0">
+        <div class="card card-pad">
+          <h2 class="h3">Yang dikerjakan</h2>
+          <p class="small muted"><%= service.scope || 'Cakupan pekerjaan dikonfirmasi teknisi saat datang.' %></p>
+        </div>
+        <div class="card card-pad">
+          <h2 class="h3">Yang perlu disiapkan</h2>
+          <p class="small muted"><%= service.requirements || 'Pastikan teknisi bisa mengakses area kerja.' %></p>
+        </div>
+      </div>
+
+      <div class="card card-pad mb-2">
+        <h2 class="h3">Cara harga dihitung</h2>
+        <p class="small muted mb-2">
+          <% if (service.price_type === 'fixed') { %>
+            Harga tetap <%= formatRupiah(service.price) %> untuk cakupan di atas. Komponen di luar cakupan ditagih terpisah dan harus disetujui lebih dulu.
+          <% } else { %>
+            Estimasi awal <%= formatRupiah(service.price) %>. Biaya final menyesuaikan temuan; teknisi mencatat temuan di work order sebelum melanjutkan.
+          <% } %>
+        </p>
+        <ul class="spec-list">
+          <li>Pembayaran penuh lewat transfer/QRIS, atau tunai setelah selesai (COD).</li>
+          <li>Tidak ada biaya survei terpisah untuk layanan ini.</li>
+          <li>Komisi platform ditanggung dari harga layanan, bukan biaya tambahan Anda.</li>
+        </ul>
+      </div>
+
+      <section aria-labelledby="ulasan-title" style="margin-top:2rem">
+        <div class="section-head section-rule" style="margin-bottom:1.2rem">
+          <h2 class="h3" id="ulasan-title">Ulasan customer</h2>
+          <% if (ratings.average) { %><span class="rating-line">Rata-rata <strong><%= ratings.average %></strong>/5</span><% } %>
+        </div>
+        <% if (reviews.length === 0) { %>
+          <div class="empty-state">
+            <span class="glyph">★</span>
+            <h3>Belum ada ulasan untuk layanan ini</h3>
+            <p>Ulasan hanya muncul dari customer yang pekerjaannya sudah selesai — jadi tidak ada ulasan palsu.</p>
+          </div>
+        <% } else { %>
+          <div class="card card-pad">
+            <% reviews.forEach((review) => { %>
+              <article class="review">
+                <span class="review-stars" aria-label="<%= review.rating %> dari 5 bintang"><%= '★'.repeat(review.rating) %><%= '☆'.repeat(5 - review.rating) %></span>
+                <p><%= review.comment %></p>
+                <footer><%= review.customer_name %> · dikerjakan <%= review.technician_name %></footer>
+              </article>
+            <% }); %>
+          </div>
+        <% } %>
+      </section>
+
+      <% if (related.length) { %>
+        <section class="section-tight">
+          <h2 class="h3">Layanan lain di kategori <%= service.category_name %></h2>
+          <div class="card" style="margin-top:.8rem">
+            <% related.forEach((item) => { %>
+              <a href="/layanan/<%= item.slug %>" style="display:flex;justify-content:space-between;gap:1rem;padding:.85rem 1rem;border-bottom:1px solid var(--line);text-decoration:none">
+                <span><strong><%= item.name %></strong><br /><small class="muted"><%= item.price_type === 'estimate' ? 'Estimasi' : 'Harga tetap' %></small></span>
+                <span class="price"><%= formatRupiah(item.price) %> →</span>
+              </a>
+            <% }); %>
+          </div>
+        </section>
+      <% } %>
+    </div>
+
+    <aside class="sticky-card">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <span class="tiny muted"><%= service.price_type === 'estimate' ? 'Mulai dari' : 'Harga tetap' %></span>
+            <div class="price" style="font-size:1.5rem"><%= formatRupiah(service.price) %></div>
+          </div>
+          <span class="chip"><%= service.duration_minutes %> menit</span>
+        </div>
+
+        <div class="card-body">
+          <% if (!currentUser) { %>
+            <p class="small muted">Masuk sebagai customer untuk memesan. Punya akun teknisi? Anda tidak bisa memesan dari akun mitra.</p>
+            <a class="btn btn-primary btn-block" href="/login?next=<%= encodeURIComponent('/layanan/' + service.slug) %>">Masuk untuk memesan</a>
+            <p class="tiny muted mt-2 mb-0" style="text-align:center">Belum punya akun? <a class="link" href="/register">Daftar customer</a></p>
+          <% } else if (currentUser.role !== 'customer') { %>
+            <div class="notice" style="margin-bottom:0">
+              <h3>Akun ini bukan customer</h3>
+              <p class="mb-0">Booking hanya bisa dibuat dari akun customer. <a class="link" href="<%= currentUser.role === 'admin' ? '/admin' : '/teknisi' %>">Buka panel Anda</a>.</p>
+            </div>
+          <% } else { %>
+            <form method="post" action="/booking/konfirmasi" id="booking-form">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="hidden" name="service_id" value="<%= service.id %>" />
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="scheduled_date">Tanggal</label>
+                  <input class="input" type="date" id="scheduled_date" name="scheduled_date" min="<%= today %>" value="<%= values.scheduled_date || '' %>" required />
+                </div>
+                <div class="field">
+                  <label for="scheduled_time">Jam</label>
+                  <select class="select" id="scheduled_time" name="scheduled_time" required>
+                    <option value="">Pilih jam</option>
+                    <% slots.forEach((slot) => { %>
+                      <option value="<%= slot %>" <%= values.scheduled_time === slot ? 'selected' : '' %>><%= slot %></option>
+                    <% }); %>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="address">Alamat lengkap</label>
+                <textarea class="textarea" id="address" name="address" rows="2" required placeholder="Nama jalan, nomor rumah, patokan" style="min-height:74px"><%= values.address || (address && address.address) || '' %></textarea>
+                <p class="help">Dibagikan hanya ke teknisi yang ditugaskan.</p>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label for="city">Kota</label>
+                  <input class="input" type="text" id="city" name="city" value="<%= values.city || (address && address.city) || '' %>" required />
+                </div>
+                <div class="field">
+                  <label for="postal_code">Kode pos</label>
+                  <input class="input" type="text" id="postal_code" name="postal_code" inputmode="numeric" maxlength="5" value="<%= values.postal_code || (address && address.postal_code) || '' %>" />
+                </div>
+              </div>
+
+              <% if (extras.length) { %>
+                <fieldset class="field" style="border:0;padding:0;margin-bottom:1rem">
+                  <legend class="field-label">Tambahkan di kunjungan yang sama</legend>
+                  <% extras.forEach((extra) => { %>
+                    <label class="check">
+                      <input type="checkbox" name="extra" value="<%= extra.id %>" <%= (values.extra || []).includes(String(extra.id)) ? 'checked' : '' %> />
+                      <span><%= extra.name %> <span class="muted">· <%= formatRupiah(extra.price) %></span></span>
+                    </label>
+                  <% }); %>
+                </fieldset>
+              <% } %>
+
+              <div class="field">
+                <label for="notes">Catatan untuk teknisi <span class="muted">(opsional)</span></label>
+                <textarea class="textarea" id="notes" name="notes" rows="2" maxlength="500" style="min-height:64px" placeholder="Merek, tipe, keluhan sejak kapan"><%= values.notes || '' %></textarea>
+              </div>
+
+              <fieldset class="field" style="border:0;padding:0;margin-bottom:1rem">
+                <legend class="field-label">Pembayaran</legend>
+                <div class="choice-group">
+                  <label class="choice">
+                    <input type="radio" name="payment_method" value="full" <%= values.payment_method !== 'cod' ? 'checked' : '' %> data-method="full" />
+                    <span><strong>Bayar penuh</strong><small>Transfer bank atau QRIS, diverifikasi admin.</small></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="payment_method" value="cod" <%= values.payment_method === 'cod' ? 'checked' : '' %> data-method="cod" />
+                    <span><strong>COD</strong><small><%= settings.cod_note %></small></span>
+                  </label>
+                </div>
+
+                <div id="channel-choice" style="margin-top:.7rem">
+                  <label class="check"><input type="radio" name="payment_channel" value="transfer" <%= values.payment_channel !== 'qris' ? 'checked' : '' %> /> <span>Transfer bank</span></label>
+                  <label class="check"><input type="radio" name="payment_channel" value="qris" <%= values.payment_channel === 'qris' ? 'checked' : '' %> /> <span>QRIS</span></label>
+                </div>
+              </fieldset>
+
+              <button class="btn btn-clay btn-block" type="submit">Lanjut ke konfirmasi</button>
+              <p class="tiny muted mt-1 mb-0">Belum ada pembayaran di langkah ini. Anda bisa memeriksa rincian dulu.</p>
+            </form>
+            <script>
+              (function () {
+                const radios = document.querySelectorAll('[data-method]');
+                const box = document.getElementById('channel-choice');
+                const sync = () => {
+                  const cod = document.querySelector('[data-method="cod"]').checked;
+                  box.style.display = cod ? 'none' : 'block';
+                };
+                radios.forEach((r) => r.addEventListener('change', sync));
+                sync();
+              })();
+            </script>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="card card-pad" style="margin-top:.8rem">
+        <h2 class="h3" style="font-size:.95rem">Kenapa aman?</h2>
+        <ul class="spec-list">
+          <li>Teknisi diverifikasi KTP & pengalaman oleh admin.</li>
+          <li>Alamat lengkap hanya terbuka untuk teknisi yang ditugaskan.</li>
+          <li>Setiap perubahan status tercatat di riwayat booking.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<%- include('partials/site-footer') %>

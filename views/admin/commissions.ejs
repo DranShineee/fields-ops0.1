@@ -1,0 +1,67 @@
+<%- include('../partials/panel-start', { panelTitle: 'Komisi', panelSub: 'Aturan komisi tidak berlaku retroaktif: pekerjaan memakai persentase saat diselesaikan.' }) %>
+
+<div class="stat-cards">
+  <div class="stat-card"><span class="stat-card-value" style="font-size:1.2rem"><%= formatRupiah(summary.fees || 0) %></span><span class="stat-card-label">Komisi platform</span></div>
+  <div class="stat-card"><span class="stat-card-value" style="font-size:1.2rem"><%= formatRupiah(summary.payouts || 0) %></span><span class="stat-card-label">Hak teknisi</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= summary.jobs || 0 %></span><span class="stat-card-label">Pekerjaan berkomisi</span></div>
+  <div class="stat-card"><span class="stat-card-value"><%= settings.commission_percent %>%</span><span class="stat-card-label">Persentase aktif</span></div>
+</div>
+
+<div class="split">
+  <div>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Rincian komisi</h2></div>
+      <div class="surface-body">
+        <% if (rows.length === 0) { %>
+          <p class="small muted mb-0">Belum ada komisi. Komisi dibuat saat work order diselesaikan.</p>
+        <% } else { %>
+          <div class="table-wrap" style="border:0">
+            <table class="table">
+              <thead><tr><th>Pekerjaan</th><th>Teknisi</th><th>Nilai</th><th>Komisi</th><th>Teknisi</th></tr></thead>
+              <tbody>
+                <% rows.forEach((row) => { %>
+                  <tr>
+                    <td><%= row.service_name %><span class="table-note"><%= row.code %> · <%= f.formatDate(row.created_at) %></span></td>
+                    <td class="small"><%= row.technician_name %></td>
+                    <td><%= formatRupiah(row.gross_amount) %></td>
+                    <td class="small"><%= row.percent %>%<span class="table-note"><%= formatRupiah(row.platform_fee) %></span></td>
+                    <td class="small"><%= formatRupiah(row.technician_earning) %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </div>
+
+  <aside>
+    <form method="post" action="/admin/komisi" class="surface mb-2" data-confirm="Ubah persentase komisi? Perubahan berlaku untuk pekerjaan yang selesai mulai hari ini.">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="surface-head"><h2>Aturan komisi</h2></div>
+      <div class="surface-body">
+        <div class="field">
+          <label for="percent">Persentase platform (%)</label>
+          <input class="input" type="number" id="percent" name="percent" min="0" max="90" step="0.5" value="<%= settings.commission_percent %>" required />
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Simpan aturan baru</button>
+        <p class="tiny muted mt-1 mb-0">Aturan baru dicatat dengan tanggal efektif hari ini. Pekerjaan yang sudah selesai tidak dihitung ulang.</p>
+      </div>
+    </form>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Riwayat aturan</h2></div>
+      <div class="surface-body">
+        <% rules.forEach((rule) => { %>
+          <div class="flex-between" style="padding:.4rem 0;border-bottom:1px solid var(--line)">
+            <span class="small"><strong><%= rule.percent %>%</strong><span class="table-note">berlaku <%= f.formatDate(rule.effective_from) %></span></span>
+            <span class="tiny muted"><%= rule.created_by_name || 'sistem' %></span>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

@@ -1,0 +1,19 @@
+<%- include('partials/head', { title: title, description: message }) %>
+<%- include('partials/site-header') %>
+
+<main id="main" class="wrap">
+  <div style="min-height:52vh;display:grid;place-items:center;padding:3rem 0">
+    <div style="max-width:56ch">
+      <p class="eyebrow">Error <%= status %></p>
+      <h1 class="display" style="font-size:clamp(2rem,4vw,3rem)"><%= title %></h1>
+      <p class="lede"><%= message %></p>
+      <div class="btn-row mt-2">
+        <a class="btn btn-primary" href="/">Kembali ke beranda</a>
+        <a class="btn btn-ghost" href="/layanan">Lihat layanan</a>
+      </div>
+      <p class="tiny muted mt-3">Jika ini terus terjadi, hubungi <%= settings.support_email %> dengan menyebutkan kode <%= status %>.</p>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/site-footer') %>

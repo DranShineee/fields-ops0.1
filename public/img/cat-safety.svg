@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Safety">
+  <rect width="640" height="400" fill="#fff7e6"/>
+  <g fill="none" stroke="#b45309" stroke-width="11" stroke-linejoin="round">
+    <path d="M244 250a76 76 0 0 1 152 0z"/>
+    <path d="M232 250h176v16H232z"/>
+    <path d="M286 174v-20h68v20"/>
+    <path d="M320 126v20"/>
+  </g>
+</svg>

@@ -1,0 +1,63 @@
+<%- include('../partials/panel-start', { panelTitle: 'Kompetensi', panelSub: 'Admin menyetujui setiap kategori secara terpisah. Tanpa kompetensi disetujui, Anda tidak bisa ditugaskan.' }) %>
+
+<div class="split">
+  <section class="surface">
+    <div class="surface-head"><h2>Kategori yang Anda ajukan</h2></div>
+    <div class="surface-body">
+      <% if (competencies.length === 0) { %>
+        <div class="empty-state" style="border:0;background:transparent;padding:1.4rem 0">
+          <span class="glyph">+</span>
+          <h3>Belum ada kompetensi</h3>
+          <p>Ajukan minimal satu kategori agar admin bisa menugaskan pekerjaan.</p>
+        </div>
+      <% } else { %>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Kategori</th><th>Status</th><th>Catatan</th><th></th></tr>
+            </thead>
+            <tbody>
+              <% competencies.forEach((row) => { %>
+                <tr>
+                  <td><strong><%= row.name %></strong><span class="table-note"><%= row.description %></span></td>
+                  <td><%- f.statusBadge({ pending: { label: 'Menunggu', tone: 'wait' }, approved: { label: 'Disetujui', tone: 'done' }, rejected: { label: 'Ditolak', tone: 'cancel' } }, row.status) %></td>
+                  <td class="small muted"><%= row.note || '—' %></td>
+                  <td>
+                    <% if (row.status !== 'approved') { %>
+                      <form method="post" action="/teknisi/kompetensi/<%= row.id %>/hapus" data-confirm="Batalkan pengajuan kompetensi <%= row.name %>?">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <button class="btn btn-ghost btn-sm" type="submit">Batalkan</button>
+                      </form>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <aside>
+    <form method="post" action="/teknisi/kompetensi" class="surface sticky-card">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <div class="surface-head"><h2>Ajukan kategori baru</h2></div>
+      <div class="surface-body">
+        <div class="field">
+          <label for="category_id">Kategori</label>
+          <select class="select" id="category_id" name="category_id" required>
+            <option value="">Pilih kategori</option>
+            <% categories.forEach((cat) => { %>
+              <option value="<%= cat.id %>"><%= cat.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Ajukan kompetensi</button>
+        <p class="tiny muted mt-1 mb-0">Admin memverifikasi berdasarkan pengalaman dan dokumen Anda.</p>
+      </div>
+    </form>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

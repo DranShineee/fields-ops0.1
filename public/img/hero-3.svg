@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="h3bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07211f"/>
+      <stop offset="0.55" stop-color="#0f4a44"/>
+      <stop offset="1" stop-color="#071b22"/>
+    </linearGradient>
+    <filter id="h3blur"><feGaussianBlur stdDeviation="30"/></filter>
+    <linearGradient id="h3box" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a8f0dd" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#a8f0dd" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#h3bg)"/>
+  <ellipse cx="1250" cy="300" rx="380" ry="240" fill="#3ddcae" opacity="0.25" filter="url(#h3blur)"/>
+
+  <g stroke="#9df3dc" stroke-opacity="0.28" fill="none" stroke-width="2">
+    <path d="M0 300h1600M0 500h1600M0 700h1600M0 900h1600"/>
+    <path d="M300 0v1000M600 0v1000M900 0v1000M1200 0v1000M1500 0v1000"/>
+  </g>
+
+  <g fill="url(#h3box)" stroke="#8ce6cd" stroke-opacity="0.45" stroke-width="2">
+    <path d="M240 620l120-56 120 56-120 58z"/>
+    <path d="M240 620v115l120 58V678z"/>
+    <path d="M480 620v115l-120 58V678z"/>
+
+    <path d="M520 700l110-52 110 52-110 54z"/>
+    <path d="M520 700v96l110 54v-96z"/>
+    <path d="M740 700v96l-110 54v-96z"/>
+
+    <path d="M900 600l130-62 130 62-130 62z"/>
+    <path d="M900 600v130l130 62V662z"/>
+    <path d="M1160 600v130l-130 62V662z"/>
+  </g>
+
+  <g fill="#9df3dc" fill-opacity="0.85">
+    <circle cx="1180" cy="230" r="7"/>
+    <circle cx="1300" cy="180" r="5"/>
+    <circle cx="1390" cy="260" r="6"/>
+  </g>
+  <g stroke="#9df3dc" stroke-opacity="0.55" fill="none" stroke-width="2">
+    <path d="M1180 230 1300 180 1390 260 1300 330 1180 230"/>
+  </g>
+
+  <path d="M0 880c300-40 520 30 780 20s460-70 820-30v130H0Z" fill="#04100f" opacity="0.8"/>
+</svg>

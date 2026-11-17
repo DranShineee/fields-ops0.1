@@ -1,0 +1,54 @@
+<%- include('../partials/panel-start', { panelTitle: 'Booking', panelSub: 'Semua permintaan customer. Buka detail untuk memproses, menugaskan, dan memverifikasi pembayaran.' }) %>
+
+<form class="filter-bar" method="get" action="/admin/booking">
+  <div class="field" style="flex:1;min-width:220px">
+    <label for="q">Cari kode / customer</label>
+    <input class="input" type="search" id="q" name="q" value="<%= filters.q %>" />
+  </div>
+  <div class="field">
+    <label for="status">Status booking</label>
+    <select class="select" id="status" name="status">
+      <option value="">Semua</option>
+      <% Object.entries(f.BOOKING_STATUS).forEach(([key, info]) => { %>
+        <option value="<%= key %>" <%= filters.status === key ? 'selected' : '' %>><%= info.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div class="field">
+    <label for="bayar">Status bayar</label>
+    <select class="select" id="bayar" name="bayar">
+      <option value="">Semua</option>
+      <% Object.entries(f.PAYMENT_STATUS).forEach(([key, info]) => { %>
+        <option value="<%= key %>" <%= filters.bayar === key ? 'selected' : '' %>><%= info.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/booking">Reset</a>
+</form>
+
+<div class="flex-between mb-1"><span class="tiny muted"><%= total %> booking</span></div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Kode</th><th>Customer</th><th>Jadwal</th><th>Layanan</th><th>Total</th><th>Status</th><th>Bayar</th><th></th></tr></thead>
+    <tbody>
+      <% bookings.forEach((booking) => { %>
+        <tr>
+          <td class="mono"><%= booking.code %><span class="table-note"><%= f.formatDate(booking.created_at) %></span></td>
+          <td><%= booking.customer_name %><span class="table-note"><%= booking.city %></span></td>
+          <td class="small"><%= f.formatDate(booking.scheduled_date) %><span class="table-note"><%= f.formatTime(booking.scheduled_time) %></span></td>
+          <td><%= booking.item_count %></td>
+          <td class="small"><%= formatRupiah(booking.total) %></td>
+          <td><%- f.statusBadge(f.BOOKING_STATUS, booking.status) %></td>
+          <td><%- f.statusBadge(f.PAYMENT_STATUS, booking.payment_status) %></td>
+          <td><a class="text-link" href="/admin/booking/<%= booking.code %>">Buka</a></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/pagination', { baseUrl: '/admin/booking', queryParams: { q: filters.q, status: filters.status, bayar: filters.bayar }, page, pages }) %>
+
+<%- include('../partials/panel-end') %>

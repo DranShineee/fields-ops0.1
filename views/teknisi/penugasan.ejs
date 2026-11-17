@@ -1,0 +1,83 @@
+<%- include('../partials/panel-start', { panelTitle: 'Penugasan masuk', panelSub: 'Terima hanya bila Anda benar-benar bisa datang. Penolakan harus disertai alasan.' }) %>
+
+<section class="surface mb-2">
+  <div class="surface-head">
+    <h2>Penawaran aktif</h2>
+    <span class="chip"><%= offers.length %> menunggu respons</span>
+  </div>
+  <div class="surface-body">
+    <% if (offers.length === 0) { %>
+      <div class="empty-state" style="border:0;background:transparent;padding:1.5rem 0">
+        <span class="glyph">✓</span>
+        <h3>Tidak ada penawaran</h3>
+        <p>Pastikan kompetensi dan area kerja Anda sudah sesuai. Admin akan mengirim penawaran berikutnya.</p>
+      </div>
+    <% } else { %>
+      <% offers.forEach((offer) => { %>
+        <article class="card card-pad" style="margin-bottom:.9rem">
+          <div class="flex-between">
+            <div>
+              <strong><%= offer.service_name %></strong>
+              <span class="table-note"><%= offer.code %> · <%= offer.category_name %> · <%= f.formatRupiah(offer.price) %></span>
+            </div>
+            <span class="chip">Ditawarkan <%= f.formatDate(offer.offered_at) %></span>
+          </div>
+
+          <div class="split-even" style="margin-top:.8rem;gap:.8rem">
+            <dl class="kv">
+              <div><dt>Jadwal</dt><dd><%= f.formatDateLong(offer.scheduled_date) %><br /><%= f.formatTime(offer.scheduled_time) %> WIB</dd></div>
+              <div><dt>Kota</dt><dd><%= offer.city %></dd></div>
+            </dl>
+            <dl class="kv">
+              <div><dt>Alamat</dt><dd><%= offer.address %></dd></div>
+              <div><dt>Catatan customer</dt><dd><%= offer.notes || '—' %></dd></div>
+            </dl>
+          </div>
+
+          <div class="split-even" style="margin-top:.9rem">
+            <form method="post" action="/teknisi/penugasan/<%= offer.assignment_id %>/terima" data-confirm="Terima pekerjaan <%= offer.service_name %>?">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <button class="btn btn-primary btn-block" type="submit">Terima penugasan</button>
+            </form>
+            <form method="post" action="/teknisi/penugasan/<%= offer.assignment_id %>/tolak">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="field" style="margin-bottom:.4rem">
+                <label for="reason-<%= offer.assignment_id %>" class="tiny muted">Alasan menolak</label>
+                <input class="input" type="text" id="reason-<%= offer.assignment_id %>" name="reason" minlength="5" maxlength="300" placeholder="mis. di luar area, jadwal bentrok" required />
+              </div>
+              <button class="btn btn-danger btn-block" type="submit">Tolak</button>
+            </form>
+          </div>
+        </article>
+      <% }); %>
+    <% } %>
+  </div>
+</section>
+
+<section class="surface">
+  <div class="surface-head"><h2>Riwayat respons</h2></div>
+  <div class="surface-body">
+    <% if (history.length === 0) { %>
+      <p class="small muted mb-0">Belum ada riwayat penugasan.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Layanan</th><th>Booking</th><th>Status</th><th>Alasan</th><th>Waktu</th></tr></thead>
+          <tbody>
+            <% history.forEach((row) => { %>
+              <tr>
+                <td><%= row.service_name %></td>
+                <td class="mono"><%= row.code %></td>
+                <td><%- f.statusBadge(f.ASSIGNMENT_STATUS, row.status) %></td>
+                <td class="small muted"><%= row.reason || '—' %></td>
+                <td class="small muted"><%= f.formatDateTime(row.responded_at || row.created_at) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/panel-end') %>

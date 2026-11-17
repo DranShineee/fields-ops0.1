@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Suku cadang">
+  <rect width="640" height="400" fill="#eef2f7"/>
+  <g fill="none" stroke="#475569" stroke-width="10" stroke-linejoin="round">
+    <circle cx="320" cy="205" r="62"/>
+    <circle cx="320" cy="205" r="20"/>
+    <path d="M320 118v25M320 267v25M233 205h25M382 205h25M258 143l18 18M364 249l18 18M258 267l18-18M364 161l18-18"/>
+  </g>
+</svg>

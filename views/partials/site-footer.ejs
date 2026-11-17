@@ -1,0 +1,85 @@
+<footer class="site-footer">
+  <div class="footer-scene" aria-hidden="true">
+    <svg viewBox="0 0 1440 220" preserveAspectRatio="xMidYMax slice" role="presentation">
+      <g fill="currentColor">
+        <path d="M0 220V150h64v-38h34v38h48v-70h26v70h44v-26h58v26h52v-52h30v52h64v-88h22v88h56v-44h44v44h58v-24h34v24h46v-64h24v64h58v-32h40v32h54v-56h26v56h76v-28h32v28h72v-48h26v48h68v70Z"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="5" opacity="0.9">
+        <circle cx="1122" cy="72" r="30"/>
+        <circle cx="1122" cy="72" r="11"/>
+        <path d="M1122 32v-16M1122 128v16M1082 72h-16M1162 72h16M1094 44l-11-11M1150 100l11 11M1150 44l11-11M1094 100l-11 11"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="6" opacity="0.85" stroke-linecap="round">
+        <path d="M250 86 264 54a14 14 0 0 1 25 12l-14 32a14 14 0 0 1-25-12Z" transform="rotate(12 264 70)"/>
+        <path d="M300 132a22 22 0 1 1-30-30l20 20Z"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="wrap footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="/" aria-label="FieldsOps — beranda">
+          <span class="brand-mark" aria-hidden="true">F.</span>
+          <span class="brand-text">
+            <strong>FieldsOps</strong>
+            <small>Jasa lapangan</small>
+          </span>
+        </a>
+        <p>
+          Menghubungkan rumah dan usaha kecil dengan teknisi terverifikasi.
+          AC, motor, laptop, sepeda — dikerjakan di tempat, dengan work order yang jelas.
+        </p>
+        <% if (adminContact && adminContact.phone) { %>
+          <a class="footer-wa" href="<%= f.waLink(adminContact.phone, 'Halo FieldsOps, saya ingin bertanya soal layanan.') %>" target="_blank" rel="noopener">
+            WhatsApp bantuan · <%= f.formatPhone(adminContact.phone) %>
+          </a>
+        <% } %>
+      </div>
+
+      <div class="footer-col">
+        <h3>Layanan</h3>
+        <% navCategories.forEach((cat) => { %>
+          <a href="/layanan?kategori=<%= cat.slug %>"><%= cat.name %></a>
+        <% }); %>
+        <a href="/layanan">Semua layanan</a>
+      </div>
+
+      <div class="footer-col">
+        <h3>FieldsOps</h3>
+        <a href="/#cara-kerja">Cara kerja</a>
+        <a href="/#ulasan">Cerita customer</a>
+        <a href="/register?role=technician">Jadi teknisi</a>
+        <a href="/kategori">Kategori</a>
+      </div>
+
+      <div class="footer-col">
+        <h3>Bantuan</h3>
+        <span><%= settings.support_email %></span>
+        <span><%= settings.operational_area %></span>
+        <span>Senin–Sabtu, 08.00–17.00 WIB</span>
+        <% if (currentUser && currentUser.role === 'customer') { %>
+          <a href="/keluhan">Ajukan keluhan</a>
+        <% } else if (!currentUser) { %>
+          <a href="/login">Masuk untuk mengajukan keluhan</a>
+        <% } %>
+        <% if (currentUser) { %>
+          <a href="/notifikasi">Notifikasi</a>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© <%= currentYear %> FieldsOps. Dikelola dari Jakarta.</span>
+      <span class="footer-links">
+        <a href="/layanan">Layanan</a>
+        <a href="/kategori">Kategori</a>
+        <a href="/health">Status layanan</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/app.js" defer></script>
+</body>
+</html>

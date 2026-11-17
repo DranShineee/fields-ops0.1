@@ -1,0 +1,65 @@
+<%- include('../partials/panel-start', { panelTitle: 'Pengaturan platform', panelSub: 'Nilai ini dipakai di halaman publik, instruksi COD, dan perhitungan komisi default.' }) %>
+
+<div class="split">
+  <form method="post" action="/admin/pengaturan" class="surface">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <div class="surface-head"><h2>Identitas &amp; operasional</h2></div>
+    <div class="surface-body">
+      <div class="field-row">
+        <div class="field">
+          <label for="platform_name">Nama platform</label>
+          <input class="input" type="text" id="platform_name" name="platform_name" value="<%= settings.platform_name %>" required />
+        </div>
+        <div class="field">
+          <label for="support_email">Email bantuan</label>
+          <input class="input" type="email" id="support_email" name="support_email" value="<%= settings.support_email %>" required />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="support_whatsapp">WhatsApp bantuan</label>
+          <input class="input" type="text" id="support_whatsapp" name="support_whatsapp" value="<%= settings.support_whatsapp %>" placeholder="628xxxxxxxxxx" />
+        </div>
+        <div class="field">
+          <label for="cancellation_hours">Batas pembatalan (jam)</label>
+          <input class="input" type="number" id="cancellation_hours" name="cancellation_hours" min="0" max="72" value="<%= settings.cancellation_hours %>" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="operational_area">Area operasional</label>
+        <input class="input" type="text" id="operational_area" name="operational_area" value="<%= settings.operational_area %>" />
+      </div>
+      <div class="field">
+        <label for="cod_note">Catatan COD</label>
+        <textarea class="textarea" id="cod_note" name="cod_note" rows="2" maxlength="300" style="min-height:64px"><%= settings.cod_note %></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Simpan pengaturan</button>
+    </div>
+  </form>
+
+  <aside>
+    <section class="surface mb-2">
+      <div class="surface-head"><h2>Komisi &amp; aturan</h2></div>
+      <div class="surface-body">
+        <dl class="kv">
+          <div><dt>Komisi aktif</dt><dd><%= settings.commission_percent %>%</dd></div>
+          <div><dt>Batas pembatalan</dt><dd><%= settings.cancellation_hours %> jam</dd></div>
+        </dl>
+        <a class="text-link mt-2" href="/admin/komisi">Kelola aturan komisi →</a>
+      </div>
+    </section>
+
+    <section class="surface">
+      <div class="surface-head"><h2>Catatan keamanan</h2></div>
+      <div class="surface-body">
+        <ul class="spec-list">
+          <li>Perubahan pengaturan dicatat di audit log.</li>
+          <li>Persentase komisi baru tidak mengubah komisi yang sudah tercatat.</li>
+          <li>Email bantuan tampil di halaman error dan footer.</li>
+        </ul>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<%- include('../partials/panel-end') %>

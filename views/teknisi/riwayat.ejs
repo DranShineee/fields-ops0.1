@@ -1,0 +1,43 @@
+<%- include('../partials/panel-start', { panelTitle: 'Riwayat pekerjaan', panelSub: 'Pekerjaan selesai beserta ulasan dan pendapatan yang tercatat.' }) %>
+
+<section class="surface">
+  <div class="surface-head">
+    <h2>Pekerjaan selesai</h2>
+    <span class="chip"><%= jobs.length %> pekerjaan</span>
+  </div>
+  <div class="surface-body">
+    <% if (jobs.length === 0) { %>
+      <div class="empty-state" style="border:0;background:transparent;padding:1.5rem 0">
+        <span class="glyph">○</span>
+        <h3>Belum ada riwayat</h3>
+        <p>Riwayat muncul setelah admin menyelesaikan work order pertama Anda.</p>
+      </div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Layanan</th><th>Booking</th><th>Tanggal</th><th>Ulasan</th><th>Pendapatan</th></tr>
+          </thead>
+          <tbody>
+            <% jobs.forEach((job) => { %>
+              <tr>
+                <td><strong><%= job.service_name %></strong><span class="table-note"><%= job.category_name %></span></td>
+                <td class="mono"><%= job.code %></td>
+                <td class="small muted"><%= f.formatDate(job.scheduled_date) %><span class="table-note"><%= job.city %></span></td>
+                <td>
+                  <% if (job.rating) { %>
+                    <span class="review-stars"><%= '★'.repeat(job.rating) %></span>
+                    <% if (job.comment) { %><span class="table-note"><%= job.comment %></span><% } %>
+                  <% } else { %><span class="tiny muted">Belum diulas</span><% } %>
+                </td>
+                <td class="small"><%= job.technician_earning ? f.formatRupiah(job.technician_earning) : '—' %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/panel-end') %>

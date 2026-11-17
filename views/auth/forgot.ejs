@@ -1,0 +1,37 @@
+<%- include('../partials/head', { title: 'Lupa kata sandi', description: 'Minta tautan reset kata sandi FieldsOps.' }) %>
+<%- include('../partials/site-header') %>
+
+<main id="main" class="wrap wrap-narrow">
+  <div style="padding:2.5rem 0 3rem;max-width:520px">
+    <p class="eyebrow">Pemulihan akun</p>
+    <h1 class="h2">Lupa kata sandi?</h1>
+    <p class="lede">Masukkan email akun Anda. Kami membuat tautan reset yang berlaku 45 menit.</p>
+
+    <%- include('../partials/flash') %>
+
+    <% if (sent) { %>
+      <div class="notice">
+        <h3>Permintaan diterima</h3>
+        <p>Jika <strong><%= email %></strong> terdaftar, tautan reset sudah dibuat. Di lingkungan produksi tautan dikirim lewat email oleh admin.</p>
+        <% if (resetLink) { %>
+          <p class="mb-0"><a class="btn btn-outline btn-sm" href="<%= resetLink %>">Buka tautan reset (mode pengembangan)</a></p>
+        <% } else { %>
+          <p class="mb-0 tiny muted">Hubungi <%= settings.support_email %> bila email tidak kunjung masuk.</p>
+        <% } %>
+      </div>
+    <% } else { %>
+      <form method="post" action="/lupa-sandi" class="card card-pad">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="field">
+          <label for="email">Email terdaftar</label>
+          <input class="input" type="email" id="email" name="email" autocomplete="email" required autofocus />
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Buat tautan reset</button>
+      </form>
+    <% } %>
+
+    <p class="small muted mt-2"><a class="link" href="/login">← Kembali ke halaman masuk</a></p>
+  </div>
+</main>
+
+<%- include('../partials/site-footer') %>
